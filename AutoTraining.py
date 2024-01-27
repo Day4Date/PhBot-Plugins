@@ -7,13 +7,8 @@ from phBot import *
 Plugin = "AutoTraining"
 PlguinVersion = "1.0"
 
-gui = QtBind.init(__name__, 'AutoTraining')
-x = 10
-y = 10
-button1 = QtBind.createButton(gui,'button1_clicked','Button 1',x,y)
-
-def button1_clicked():
-   check_level(20)
+#Set the amount of Partymembers
+members = 8
 
 #Put here the coordinates and level when you want to change to that area
 #These below are for EU, starting in Constatinople
@@ -48,12 +43,13 @@ def check_level(level):
     return
 
 def check_party():
+    global members
     level = get_character_data()
     lvl = level['level']
     lowestLvl = lvl
     party = get_party()
     if party:
-        if len(party)==8:
+        if len(party)==members:
             for key in party:
                 if party[key]['name'] == level['name']:
                     continue
