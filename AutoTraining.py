@@ -5,7 +5,39 @@ import sqlite3
 from phBot import *
 
 Plugin = "AutoTraining"
-PlguinVersion = "1.0"
+PlguinVersion = "1.1"
+
+#Globals
+enabled = False
+solo = False
+
+gui = QtBind.init(__name__, Plugin)
+
+#Set GUI
+x = 10
+y = 20
+
+#checkboxes/Buttons
+checkEnable = QtBind.createCheckBox(gui,'checkEnable_clicked','Enable Plugin',x,y)
+checkSolo = QtBind.createCheckBox(gui,'checkSolo_clicked','Solo',x,y+30)
+
+def checkEnable_clicked(checked):
+    global enabled
+    if checked:
+        enabled = True
+        log(f'{Plugin}: Plugin has been enabled!') 
+    else:
+        enabled = False
+        log(f'{Plugin}: Plugin has been disabled!') 
+
+def checkSolo_clicked(checked):
+    global solo
+    if checked:
+        solo = True
+        log(f'{Plugin}: Solo mode has been enabled!')
+    else:
+        solo = False
+        log(f'{Plugin}: Party mode has been enabled!')
 
 #Set the amount of Partymembers
 members = 8
@@ -43,10 +75,13 @@ def check_level(level):
     return
 
 def check_party():
-    global members
+    global members,solo
     level = get_character_data()
     lvl = level['level']
     lowestLvl = lvl
+    if solo:
+        check_level(lvl)
+        return
     party = get_party()
     if party:
         if len(party)==members:
@@ -59,8 +94,10 @@ def check_party():
     return
     
 def handle_joymax(opcode,data):
-    if opcode == 0x3056:
-        check_party()
+    global enabled
+    if enabled:
+        if opcode == 0x3056:
+            check_party()
     return True
 
 log(f'Plugin: {Plugin} v{PlguinVersion} sucessfully loaded!')
