@@ -1815,5 +1815,21 @@ def handle_chat(t,player,msg):
             if msg == "Get Role" and not reading_chat:
                 phBotChat.Party(PLUGIN + ": Role = " +char.role)
 
-
+def check_Update():
+	global NewestVersion
+	if NewestVersion == 0:
+		try:
+			req = urllib.request.Request('https://raw.githubusercontent.com/Day4Date/PhBot-Plugins/refs/heads/main/AutoParty.py', headers={'User-Agent': 'Mozilla/5.0'})
+			with urllib.request.urlopen(req) as f:
+				lines = str(f.read().decode("utf-8")).split()
+				for num, line in enumerate(lines):
+					if line == 'PLUGIN_VERSION':
+						NewestVersion = int(lines[num+2].replace(".",""))
+						CurrentVersion = int(str(PLUGIN_VERSION).replace(".",""))
+						if NewestVersion > CurrentVersion:
+							print(f'Plugin: There is an update avaliable for {PLUGIN}!')
+		except:
+			pass
+      
+check_Update()
 log(f'Plugin: {PLUGIN} v{str(PLUGIN_VERSION)} sucessfully loaded!')
