@@ -1038,9 +1038,8 @@ def get_map_coordinates(region_id,pos_x,pos_y):
         Y = (((region_id >> 8) & 0xFF) - 128) * 192 + pos_y / 10
     return X,Y
 
-def readDB(table,col,item):
-    if db_path == '':
-        db_path = QtBind.text(gui,path_database)
+def readDB(table,col,item):        
+    db_path = QtBind.text(gui,path_database)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     query = f"SELECT * FROM {table}"
@@ -1640,8 +1639,7 @@ class Buy_items():
         self.is_buying_items = False
 
     def read_db_comp_table(self,table,col,item):
-        if db_path == '':
-            db_path = QtBind.text(gui,path_database)
+        db_path = QtBind.text(gui,path_database)
         db_list = []
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
