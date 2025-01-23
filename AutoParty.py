@@ -1827,7 +1827,7 @@ def check_Update():
 						NewestVersion = int(lines[num+2].replace(".",""))
 						CurrentVersion = int(str(PLUGIN_VERSION).replace(".",""))
 						if NewestVersion > CurrentVersion:
-							print(f'Plugin: There is an update avaliable for {PLUGIN}!')
+							log(f'Plugin: There is an update avaliable for {PLUGIN}!')
 		except:
 			pass
       
