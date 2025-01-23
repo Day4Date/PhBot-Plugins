@@ -204,28 +204,7 @@ def save_clicked():
         log(f'{PLUGIN}: Please teleport to load Data first')
 
 def button2_clicked():
-    i = 0
-    opcode =[0x7045,0x704B,0x7046,0x7034]
-    items,npc_id = get_item_list()
-    hex_str = "08" #fix
-    byte_str = bytes.fromhex(hex_str)
-    p = byte_str
-    p += struct.pack('<H',2) #tab
-    hex_str = "01"#fix
-    byte_str = bytes.fromhex(hex_str)
-    p += byte_str
-    p2 = struct.pack('<I',84)#npc id  
-    p2 = b'\x00' + p2 
-    p += p2
-    log(str(p))
-    data = [struct.pack('<I',npc_id),struct.pack('<I',npc_id),struct.pack('<I',npc_id) + struct.pack('1B',0x01),p]
-    inject_joymax(opcode[i],data[i],False)
-    i += 1
-    Timer(1.0,inject_joymax,[opcode[i],data[i],False]).start()
-    i += 1
-    Timer(1.2,inject_joymax,[opcode[i],data[i],False]).start()
-    i += 1
-    Timer(2.5,inject_joymax,[opcode[i],data[i],False]).start()
+    log('Function coming soon')
 
 def buy_items_clicked():
     item = Buy_items()
@@ -239,34 +218,10 @@ def load_clicked():
     game_data_loaded = True
 
 def button5_clicked():
-    p = get_training_area()
-    log(str(p))
+    log('Function coming soon')
 
 def button6_clicked():
-        log(str(quest.name))
-        log(str(quest.server_name))
-        log(str(quest.npc_region))
-        log(str(quest.npc_x))
-        log(str(quest.npc_y))
-        log(str(quest.npc_start_name))
-        log(str(quest.npc_game_x))
-        log(str(quest.npc_game_y))
-        log(str(quest.is_doing_quest))
-        log(str(quest.is_walking_to_npc))
-        log(str(quest.is_walking_to_monster))
-        log(str(quest.is_talking_to_npc))
-        log(str(quest.is_attacking_monsters))
-        log(str(quest.has_quest_taken))
-        log(str(quest.quest_completed))
-        log(str(quest.is_teleporting_for_quest))
-        log(str(quest.cur_char_position))
-        log(str(quest.char_training_area))
-        log(str(quest.char_quest_area))
-        log(str(quest.quest_data))
-        log(str(quest.is_beginner_quest))
-        log(str(quest.has_item_reward))
-        log(str(quest.current_character_quests))
-        log(str(quest.quest_list))
+        log('Function coming soon')
 
 
 ### Checkbox ###
