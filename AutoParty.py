@@ -1019,10 +1019,12 @@ def reset_blocker_change_area():
     blocker_change_area = False
 
 def update_area_visual(level):
-    cur_area_level = get_current_auto_area()['level']
-    next_area_level = cur_area_level - level
-    QtBind.setText(gui,gui_trainingarea_value,str(cur_area_level))
-    QtBind.setText(gui,gui_next_trainingarea_value,str(next_area_level))
+    cur_area = get_current_auto_area()
+    if cur_area:
+        cur_area_level = cur_area['level']
+        next_area_level = cur_area_level - level
+        QtBind.setText(gui,gui_trainingarea_value,str(cur_area_level))
+        QtBind.setText(gui,gui_next_trainingarea_value,str(next_area_level))
 
 ### Auto-Quest ###
 # Automaticly finishes Inventory-Expansion #
