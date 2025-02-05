@@ -9,10 +9,11 @@ import time
 import shutil
 from threading import Timer
 import urllib.request
+import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.1
+PLUGIN_VERSION = 0.2
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -20,8 +21,10 @@ DEFAULT_AREA_OFFSET = 0
 DEFAULT_AUTO_AREA = True
 DEFAULT_BUY_ITEMS_DELAY = 180
 db_path = ''
+NewestVersion = 0
 
 ###Skill Lists###
+## Eu ##
 #Warrior
 LIST_WARRIOR_PARTY_BUFFS = ["Pain Quota","Physical Fence","Magical Fence","Protect","Physical Screen","Ultimate Screen","Morale Screen"]
 #1H-Sword
@@ -38,7 +41,7 @@ LIST_AXE_BUFFS = ["Vital Increase","Iron Skin","Mana Skin"]
 #Wizzard
 LIST_WIZ_ATTACKS = ["Fire Bolt","Meteor","Fire Blow","Salamander Blow","Ice Bolt","Frozen Spear","Snow Wind","Blizzard",
                     "Lightning Bolt","Chain Lightning","Charged Wind","Charged Squall","Ground Charge","Ground Rave ","Earth Shock","Earth Quake",]
-LIST_WIZ_BUFFS = ["Life Control","Life Turnover","Earth Barrier","Earth Fence"]
+LIST_WIZ_BUFFS = ["Life Control","Life Turnover","Earth Barrier","Earth Fence","Bless Spell","Holy Word","Holy Spell","Moving March","Swing March","Noise"]
 #XBow
 LIST_XBOW_ATTACKS = []
 LIST_XBOW_BUFFS = []
@@ -49,7 +52,7 @@ LIST_DAGGER_BUFFS = []
 LIST_WARLOCK_ATTACKS = ["Blood Flower","Death Flower","Bloody Trap","Death Trap","Blaze","Dark Blaze","Toxin ","Toxin Invasion","Decayed","Dark Decayed",
                         "Curse Breath","Dark Breath","Medical Raze","Magical Ravage","Combat Raze","Combat Ravage","Courage Raze","Courage Ravage",
                         "Vampire Touch","Vampire Kiss"]
-LIST_WARLOCK_BUFFS = ["Mirage","Phantasma","Reflect","Advanced Reflect"]
+LIST_WARLOCK_BUFFS = ["Mirage","Phantasma","Reflect","Advanced Reflect","Bless Spell","Holy Word","Holy Spell"]
 #Bard
 LIST_BARD_ATTACKS = ["Horror Chord","Weird Chord","Booming Chord","Booming Wave",]
 LIST_BARD_BUFFS_MAIN = ["Moving March","Swing March","Guard Tambour","Noise","Mana Cycle","Mana Orbit"]
@@ -62,8 +65,7 @@ LIST_CLERIC_BUFFS = ["Reverse","Grad Reverse","Healing Cycle","Soul Deity",
                      "Holy Group Reverse","Reverse Oblation","Reverse Immolation","Holy Word","Holy Spell","Body Blessing","Body Deity","Soul Blessing"]
 LIST_CLERIC_PARTY_BUFFS = ["Force Blessing","Force Deity","Mental Blessing","Mental Deity","Body Blessing","Body Deity","Soul Blessing","Soul Deity",
                            "Healing Cycle"]
-LIST_CLERIC_HEALING_BUFFS = ["Group Recovery","Healing Division","Group Healing","Group Healing Breath","Healing Favor","Holy Group Recovery",
-                             "Holy Word","Holy Spell","Body Bles    sing","Body Deity","Soul Blessing"]
+LIST_CLERIC_HEALING_BUFFS = ["Group Recovery","Healing Division","Group Healing","Group Healing Breath","Healing Favor","Holy Group Recovery"]
 
 LIST_INT_BUFFS = ["Mental Blessing","Mental Deity"]
 LIST_STR_BUFFS = ["Force Blessing","Force Deity"]
@@ -72,7 +74,64 @@ LIST_MAG_BUFFS = ["Soul Blessing","Soul Deity"]
 
 LIST_LIMITED_PARTY_BUFFS = ["Mental Blessing","Mental Deity","Force Blessing","Force Deity","Pain Quota","Physical Fence","Magical Fence","Protect"]
 LIST_SCRIPT_BUFFS=["Moving March","Swing March","Guard Tambour","Noise","Soul Deity","Recovery Division","Holy Recovery Division"]
+LIST_EXCL_BUFFS = ['Str','Int','Pain Quota','Physical Fence',"Magical Fence","Protect","Physical Screen","Ultimate Screen","Morale Screen"]
+## Ch ##
+#Bicheon
+LIST_BICHEON_ATTACKS = ["Strike Smash","Stab Smash","Crosswise Smash ","Flying Stone Smash","Twin Energy Smash","Illusion Chain","Blood Chain","Billow Chain",
+                        "Ascension Chain","Heaven Chain","Lightning Chain","Thousand Army Chain","Soul Cut Blade","Evil Cut Blade","Devil Cut Blade","Demon Cut Blade",
+                        "Ghost Cut Blade","Blood Blade Force","Soul Blade Force","Demon Blade Force","Ocean Blade Force","Flower Bloom Blade","Flower Bud Blade",
+                        "Dragon Sore Blade","Asura Cut Blade","Heavenly Blade","Snake Sword Dance","Petal Sword Dance","Typhoon Sword Dance","Chaotic Sword Dance"]
+LIST_BICHEON_NUKER_ATTACKS = ["Illusion Chain","Blood Chain","Billow Chain",
+                        "Ascension Chain","Heaven Chain","Lightning Chain","Thousand Army Chain","Soul Cut Blade","Evil Cut Blade","Devil Cut Blade","Demon Cut Blade",
+                        "Ghost Cut Blade""Flame Wave - Arrow ","Flame Wave - Burning","Flame Wave - Wide","Flame Wave - Bomb","Flame Wave - HellFire","Flame Wave - Disintegrate",
+                      "Wolf's Thunderbolt","Tiger's Thunderbolt","Horse's Thunderbolt","Crane's Thunderbolt","Shock Lion Shout","Heaven Lion Shout","Earth Lion Shout",
+                      "Power Lion Shout","Execution Lion Shout","Cold wave - Arrest","Cold wave - Binding","Cold wave - Shackle","Cold Wave - Freeze","Cold Wave - Soul",
+                      "Snow Storm - Ice shot","Snow Storm - Ice rain","Snow Storm - Double Shot","Snow Storm - Multi Shot"]
+LIST_BICHEON_BUFFS = ["Flame body - Wisdom","Flame body - Power","Flame body - Extreme","Flame Body - Trial","Flame Body - God","Basic Fire protection",
+                      "Divine Fire protection","Hard Fire protection","Earth Fire Protection","God Fire Protection","Must - Piercing Force","Flow - Piercing Force",
+                      "Speed - Piercing Force","Force - Piercing Force","God - Piercing Force","Grass Walk - Flow","Ghost Walk - phantom","Grass Walk - Speed",
+                      "Ghost Walk - Shadow","Ghost Walk - God","Concentration - 1st","Concentration - 2nd","Concentration - 3rd","Concentration - 4th","Weak Guard of Ice",
+                      "Soft Guard of Ice","Power Guard of Ice","Might Guard of Ice","Final Guard of Ice","Harmony Therapy","Adaptation Therapy","Whole Therapy","Source Therapy",
+                      "Castle Shield","Mountain Shield","Ironwall Shield","Giant Shield","Iron Castle Shield","Sun Guard Shield"]
+#Heuksal
+LIST_HEUKSAL_ATTACKS = ["Wolf Bite Spear","Waning Moon Spear","Yuhon Spear","Lightning Bird Spear","Celestial Cloud Spear","Dancing Demon Spear","Jade Breaking Spear",
+                        "Spirit Crash Spear","Windless Spear","Death Bringer Spear","Soul Spear - Move","Soul Spear - Truth","Soul Spear - Soul","Soul Spear - Emperor",
+                        "Soul Spear - Destruction","Ghost Spear - Petal","Ghost Spear - Prince","Ghost Spear - Mars","Ghost Spear - Storm Cloud","Ghost Spear - Emperor",
+                        "Chain Spear - Tiger","Chain Spear - Nachal","Chain Spear - Shura","Chain Spear - Pluto","Chain Spear - Dragon","Chain Spear - Phoenix",
+                        "Flying Dragon - Flow","Flying Dragon - Fly","Flying Dragon - Bless ","Flying Dragon - Flash"]
+LIST_HEUKSAL_NUKER_ATTACKS = ["Soul Spear - Destruction","Ghost Spear - Petal","Ghost Spear - Prince","Ghost Spear - Mars","Ghost Spear - Storm Cloud","Ghost Spear - Emperor",
+                        "Flying Dragon - Flow","Flying Dragon - Fly","Flying Dragon - Bless ","Flying Dragon - Flash","Flame Wave - Arrow ","Flame Wave - Burning","Flame Wave - Wide","Flame Wave - Bomb","Flame Wave - HellFire","Flame Wave - Disintegrate",
+                      "Wolf's Thunderbolt","Tiger's Thunderbolt","Horse's Thunderbolt","Crane's Thunderbolt","Shock Lion Shout","Heaven Lion Shout","Earth Lion Shout",
+                      "Power Lion Shout","Execution Lion Shout","Cold wave - Arrest","Cold wave - Binding","Cold wave - Shackle","Cold Wave - Freeze","Cold Wave - Soul",
+                      "Snow Storm - Ice shot","Snow Storm - Ice rain","Snow Storm - Double Shot","Snow Storm - Multi Shot"]
+LIST_HEUKSAL_BUFFS = ["Flame body - Wisdom","Flame body - Power","Flame body - Extreme","Flame Body - Trial","Flame Body - God","Basic Fire protection",
+                      "Divine Fire protection","Hard Fire protection","Earth Fire Protection","God Fire Protection","Must - Piercing Force","Flow - Piercing Force",
+                      "Speed - Piercing Force","Force - Piercing Force","God - Piercing Force","Grass Walk - Flow","Ghost Walk - phantom","Grass Walk - Speed",
+                      "Ghost Walk - Shadow","Ghost Walk - God","Concentration - 1st","Concentration - 2nd","Concentration - 3rd","Concentration - 4th","Weak Guard of Ice",
+                      "Soft Guard of Ice","Power Guard of Ice","Might Guard of Ice","Final Guard of Ice","Harmony Therapy","Adaptation Therapy","Whole Therapy","Source Therapy","Bloody Fan Storm",
+                    "Bloody Wolf Storm","Bloody Snake Storm ","Bloody Demon Storm","Bloody Ghost Storm","Bloody Emperor Storm"]
+#Pacheon
+LIST_PACHEON_ATTACKS = ["Anti Devil Bow - Missile","Anti Devil Bow - Wave","Anti Devil Bow - Steel","Anti Devil Bow - Strike","Anti Devil Bow - Annihilate",
+                        "Anti Devil Bow - Demolition","2 Arrow Combo","3 Arrow Combo","4 Arrow Combo ","5 Arrow Combo ","6 Arrow Combo","Autumn Wind - Flame",
+                        "Autumn Wind - Snake","Autumn Wind - Blood","Autumn Wind - Red","Autumn Wind - Devil","Berserker Arrow","Demon Arrow","Devil Arrow",
+                        "Celestial Beast Arrow","Strong Bow - Spirit","Strong Bow - Vision","Strong Bow - Craft","Strong Bow - Will","Mind Bow - Flower",
+                        "Mind Bow - Butterfly","Mind Bow - Swift","Mind Bow - Lighting"]
+LIST_PACHEON_BUFFS = ["Flame body - Wisdom","Flame body - Power","Flame body - Extreme","Flame Body - Trial","Flame Body - God","Basic Fire protection",
+                      "Divine Fire protection","Hard Fire protection","Earth Fire Protection","God Fire Protection","Must - Piercing Force","Flow - Piercing Force",
+                      "Speed - Piercing Force","Force - Piercing Force","God - Piercing Force","Grass Walk - Flow","Ghost Walk - phantom","Grass Walk - Speed",
+                      "Ghost Walk - Shadow","Ghost Walk - God","Concentration - 1st","Concentration - 2nd","Concentration - 3rd","Concentration - 4th","Weak Guard of Ice",
+                      "Soft Guard of Ice","Power Guard of Ice","Might Guard of Ice","Final Guard of Ice","White Hawk Summon","Black Hawk Summon","Blue Hawk Summon",
+                      "Lightning Hawk Summon","Ice Hawk","Demon Soul Arrow","Bloody Soul Arrow","Dragon Soul Arrow","Phoenix Soul Arrow"]
+#Nuker
+LIST_NUKER_ATTACKS = ["Flame Wave - Arrow ","Flame Wave - Burning","Flame Wave - Wide","Flame Wave - Bomb","Flame Wave - HellFire","Flame Wave - Disintegrate",
+                      "Wolf's Thunderbolt","Tiger's Thunderbolt","Horse's Thunderbolt","Crane's Thunderbolt","Shock Lion Shout","Heaven Lion Shout","Earth Lion Shout",
+                      "Power Lion Shout","Execution Lion Shout","Cold wave - Arrest","Cold wave - Binding","Cold wave - Shackle","Cold Wave - Freeze","Cold Wave - Soul",
+                      "Snow Storm - Ice shot","Snow Storm - Ice rain","Snow Storm - Double Shot","Snow Storm - Multi Shot"]
 
+
+LIST_SKILL_EXCEPTIONS = ["Meteor"]
+DIC_SKILL_NAME_CHANGER = {'Body Blessing':'Physical Buff','Body Deity':'Physical Buff','Soul Blessing':'Magical Buff','Soul Deity':'Magical Buff',
+                    'Force Blessing':'Str','Force Deity':'Str','Mental Blessing':'Int','Mental Deity':'Int'}
 ### Training Areas ###
 LIST_TRAINING_AREA =[{'level':4,'x': -11482.5, 'y': 2688.199951171875, 'z': 19.0, 'region': 27211, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':7,'x': -12271.2001953125, 'y': 2567.10009765625, 'z': -20.0, 'region': 26951, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
@@ -96,12 +155,17 @@ LIST_TRAINING_AREA =[{'level':4,'x': -11482.5, 'y': 2688.199951171875, 'z': 19.0
                      {'level':64,'x': -24159.0, 'y': -198.0, 'z': -8.0, 'region': -32767, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
                      {'level':66,'x': -24136.599609375, 'y': -172.60000610351562, 'z': 145.0, 'region': -32767, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
                      {'level':60,'x': 9.0, 'y': 1757.9000244140625, 'z': 23.0, 'region': 25991, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
-                     {'level':67,'x': -305.3999938964844, 'y': 1859.800048828125, 'z': -504.0, 'region': 25989, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
-                     {'level':72,'x': -415.8999938964844, 'y': 1963.199951171875, 'z': -184.0, 'region': 26244, 'path': '', 'radius': 20.0, 'pick_radius': 50.0}]
+                     {'level':66,'x': -305.3999938964844, 'y': 1859.800048828125, 'z': -504.0, 'region': 25989, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
+                     {'level':71,'x': -5522.10009765625, 'y': 632.0999755859375, 'z': 4003.0, 'region': 24426, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':74,'x': -5199.60009765625, 'y': -59.80000305175781, 'z': 2076.0, 'region': 23403, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':82,'x': -4157.89990234375, 'y': -497.8999938964844, 'z': 3305.0, 'region': 22897, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':87,'x': -4977.7998046875, 'y': -138.60000610351562, 'z': 3114.0, 'region': 23405, 'path': '', 'radius': 15.0, 'pick_radius': 50.0}]
 
 ### Dic Quests Area  ###
 DIC_QUEST_AREA = {'Inventory Expansion 1 (Europe)':{'x': -11303.400390625, 'y': 2670.199951171875, 'z': 42.0, 'region': 26956, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
-                  'Inventory Expansion 2 (Europe)':{'x': -6101.0, 'y': 2533.60009765625, 'z': 180.0, 'region': 26983, 'path': '', 'radius': 50.0, 'pick_radius': 50.0}}
+                  'Inventory Expansion 2 (Europe)':{'x': -6059.5, 'y': 2505.699951171875, 'z': 180.0, 'region': 26983, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                  'Inventory Expansion 3 (Common)':{'x': -2042.300048828125, 'y': 82.19999694824219, 'z': 1550.0, 'region': 23676, 'path': '', 'radius': 50.0, 'pick_radius': 50.0},
+                  'Inventory Expansion 1 (China)':{'x': 6455.5, 'y': 825.9000244140625, 'z': -29.0, 'region': 24744, 'path': '', 'radius': 50.0, 'pick_radius': 50.0}}
 
 ### NPCS ###
 LIST_NPC_PROTECTOR = ['Protector Trader Jatomo','Protector Trader Aryoan','Protector Trader Gonishya','Protector Trader Yeolah','Protector Trader Mrs Jang']
@@ -131,6 +195,7 @@ bool_walk_to_quest = False
 bool_walk_to_monster = False
 blocker_buy = False
 blocker_change_area = False
+blocker_skills = False
 
 #Set GUI
 x = 10
@@ -145,6 +210,13 @@ checkCave = QtBind.createCheckBox(gui,'checkCave_clicked','Use Cave',x+220,y+30)
 checkTrainingArea = QtBind.createCheckBox(gui,'checkTraining_clicked', 'Auto Area',x,y+60)
 partySizeText = QtBind.createLabel(gui, 'Party Size', x, y+90)
 partySize = QtBind.createCombobox(gui, x+100, y+90, 100, 20)
+roleText = QtBind.createLabel(gui, 'Role', x+220, y+90)
+roleValue = QtBind.createCombobox(gui, x+260, y+90, 100, 20)
+QtBind.append(gui,roleValue,'Attacker')
+QtBind.append(gui,roleValue,'Healer')
+QtBind.append(gui,roleValue,'Bard')
+QtBind.append(gui,roleValue,'Warrior')
+QtBind.append(gui,roleValue,'Nuker')
 delayChangeArea = QtBind.createLabel(gui, 'Delay Area (min)', x, y+120)
 delayChangeAreaValue = QtBind.createCombobox(gui, x+100, y+120, 100, 20)
 offsetChangeArea = QtBind.createLabel(gui, 'Offset Area ', x, y+150)
@@ -160,10 +232,10 @@ for i in range(-5,6):
 x += 400
 
 button1 = QtBind.createButton(gui,'save_clicked','Save Settings',x,y)
-button2 = QtBind.createButton(gui,'button2_clicked','Button 2',x+100,y)
+button2 = QtBind.createButton(gui,'stop_script_clicked','Stop Script',x+100,y)
 button3 = QtBind.createButton(gui,'buy_items_clicked','Buy Items',x+200,y)
 button4 = QtBind.createButton(gui,'load_clicked','Load Settings',x,y+30)
-button5 = QtBind.createButton(gui,'button5_clicked','Button 5',x+100,y+30)
+button5 = QtBind.createButton(gui,'do_quest_clicked','Do Quest',x+100,y+30)
 button6 = QtBind.createButton(gui,'button6_clicked','Button 6',x+200,y+30)
 
 label_databse = QtBind.createLabel(gui,'Database path:',x-100,y+60)
@@ -203,8 +275,8 @@ def save_clicked():
     else:
         log(f'{PLUGIN}: Please teleport to load Data first')
 
-def button2_clicked():
-    log('Function coming soon')
+def stop_script_clicked():
+    stop_script()
 
 def buy_items_clicked():
     item = Buy_items()
@@ -217,12 +289,17 @@ def load_clicked():
     Timer(2.0,load_last_plugin_settings,()).start()
     game_data_loaded = True
 
-def button5_clicked():
-    log('Function coming soon')
+def do_quest_clicked():
+    q = check_available_quest()
+    if q:
+        do_auto_quest()
 
 def button6_clicked():
-        log('Function coming soon')
-
+        global char
+        char = Character()
+        add_skills()
+        # p = get_training_area()
+        # log(str(p))
 
 ### Checkbox ###
 def checkEnable_clicked(checked):
@@ -430,28 +507,16 @@ def check_settings():
     change_bot_config_settings(arg1 = l1,arg2 = l2)
 
 def get_masterys():
-    mastery = get_mastery()
-    prim_mastery = None
-    sec_mastery = None
-    prim_id = 0
-    sec_id = 0
-    for id in mastery:
-        if mastery[id]['level'] > 0:
-            if prim_mastery == None:
-                prim_mastery = mastery[id]
-                prim_id = id
-                sec_mastery = mastery[id]
-                sec_id = id
-                continue
-            if prim_mastery['level'] <= mastery[id]['level']:
-                sec_mastery = prim_mastery
-                sec_id = prim_id
-                prim_mastery = mastery[id]
-                prim_id = id
-            else:
-                sec_mastery = mastery[id]
-                sec_id = id
-    return prim_mastery,sec_mastery,prim_id,sec_id
+    dic_mastery = get_mastery()    
+    dic_mastery = sorted(dic_mastery.items(), key=lambda item: item[1]['level'],reverse=True)
+    list_masterys = []
+    for i in range(0,len(dic_mastery)):
+        if dic_mastery[i][1]['level'] > 0:
+            id = dic_mastery[i][0]
+            level = dic_mastery[i][1]['level']
+            name = dic_mastery[i][1]['name']
+            list_masterys.append({'Name':name,'ID':id,'Level':level})
+    return list_masterys
 
 def update_skills():
     global role
@@ -584,12 +649,7 @@ def create_config_file():
                 log(f"{PLUGIN}: No default.json found. Creating a new default file!")
                 data={
                     "Name": "",
-                    "Mastery": {
-                        "First Mastery": "",
-                        "First ID": 0,
-                        "Second Mastery": "",
-                        "Second ID": 0
-                    },
+                    "Mastery": [],
                     "Skills": {
                         "Weapon": "",
                         "Attack List": [],
@@ -652,15 +712,16 @@ def save_settings():
             config_data = json.load(f)
             try:
                 config_data['Name'] = char.name
-                config_data['Mastery']['First Mastery'] = char.first_mastery_name
-                config_data['Mastery']['First ID'] = char.first_id 
-                config_data['Mastery']['Second Mastery'] = char.second_mastery_name
-                config_data['Mastery']['Second ID'] = char.second_id  
+                if len(config_data['Mastery']) > 0:
+                    config_data['Mastery']=[]
+                for i in range(0,len(char.masterys)):                    
+                    config_data['Mastery'].append(char.masterys[i])
                 config_data['Skills']['Weapon'] = char.weapon              
                 config_data['Skills']['Attack List'] = char.attack_list              
                 config_data['Skills']['Buff List'] = char.buff_list              
-                config_data['Skills']['Party Buff List'] = char.party_buff_list              
-                config_data['Role'] = char.role              
+                config_data['Skills']['Party Buff List'] = char.party_buff_list
+                config_data['Skills']['Healing Buff List'] = char.healing_buff_list                             
+                config_data['Role'] = QtBind.text(gui, roleValue)             
                 config_data['Main Bard'] = is_main_bard
                 config_data['Plugin enabled'] = enabled
                 config_data['Party Size'] = QtBind.text(gui, partySize)   
@@ -669,7 +730,7 @@ def save_settings():
                 config_data['Delay Area'] = QtBind.text(gui, delayChangeAreaValue) 
                 config_data['Auto Area'] = auto_area
                 config_data['DB Path'] = QtBind.text(gui,path_database)   
-                config_data['Offset Area'] = QtBind.text(gui, offsetChangeAreaValue)             
+                config_data['Offset Area'] = QtBind.text(gui, offsetChangeAreaValue)                        
                 with open(char_config_path,'w') as f:
                     json.dump(config_data,f,indent=4)
             except:
@@ -682,28 +743,26 @@ def load_settings_from_json():
                 config_data = json.load(file)
                 try:
                     data = {}
-                    data['name'] = config_data['Name']
-                    data['mastery'] = {"first mastery":config_data["Mastery"]["First Mastery"],
-                                       "first id":config_data["Mastery"]["First ID"],
-                                       "second mastery":config_data["Mastery"]["Second Mastery"],
-                                       "second id":config_data["Mastery"]["Second ID"],
-                                       }
-                    data['skills'] = {"weapon":config_data["Skills"]["Weapon"],
-                                      "attack list":config_data["Skills"]["Attack List"],
-                                      "buff list":config_data["Skills"]["Buff List"],
-                                      "party buff list":config_data["Skills"]["Party Buff List"],
+                    data['name'] = config_data.get('Name',"")
+                    data['mastery'] = config_data.get('Mastery', None)
+                    data['skills'] = {"weapon": config_data.get("Skills", {}).get("Weapon", []),
+                                      "attack list": config_data.get("Skills", {}).get("Attack List", []),
+                                      "buff list": config_data.get("Skills", {}).get("Buff List", []),
+                                      "party buff list": config_data.get("Skills", {}).get("Party Buff List", []),
+                                      "healing buff list": config_data.get("Skills", {}).get("Healing Buff List", [])
                                       }
-                    data['role'] = config_data['Role']
-                    data['main bard'] = config_data['Main Bard']
-                    data['plugin enabled'] = config_data['Plugin enabled']
-                    data['solo mode'] = config_data['Solo Mode']
-                    data['auto quest'] = config_data['Auto Quest']
-                    data['buy items'] = config_data['Buy Items']
-                    data['party size'] = config_data['Party Size']
-                    data['delay area'] = config_data['Delay Area']
-                    data['offset area'] = config_data['Offset Area']
-                    data['auto area'] = config_data['Auto Area']
-                    data['db path'] = config_data['DB Path']
+                    data['role'] = config_data.get('Role', 'None')
+                    data['main bard'] = config_data.get('Main Bard', False)
+                    data['plugin enabled'] = config_data.get('Plugin enabled', False)
+                    data['solo mode'] = config_data.get('Solo Mode', False)
+                    data['auto quest'] = config_data.get('Auto Quest', False)
+                    data['buy items'] = config_data.get('Buy Items', False)
+                    data['party size'] = config_data.get('Party Size', 1)
+                    data['delay area'] = config_data.get('Delay Area', 0)
+                    data['offset area'] = config_data.get('Offset Area', 0)
+                    data['auto area'] = config_data.get('Auto Area', False)
+                    data['use cave'] = config_data.get('Use Caves', False)
+                    data['db path'] = config_data.get('DB Path', '')
                 except:
                     log(f"{PLUGIN}: Can´t read Data. An Error occured while reading the config file!")
     return data
@@ -712,9 +771,10 @@ def get_roles_from_chat():
     global reading_chat
     reading_chat = True
     phBotChat.Party(f"{PLUGIN}: Get Role")
+    Timer(2.0,add_party_skills,[]).start()
 
 def load_last_plugin_settings():
-    global enabled, is_main_bard, solo_mode, auto_quest,char,buy_npc_items,auto_area,db_path
+    global enabled, is_main_bard, solo_mode, auto_quest,char,buy_npc_items,auto_area,db_path,use_cave
     data = load_settings_from_json()
     if data['plugin enabled']:
         enabled = True
@@ -758,6 +818,11 @@ def load_last_plugin_settings():
         QtBind.setChecked(gui,checkTrainingArea,True)
     else:
        auto_area = False
+    if data['use cave']:
+        use_cave = True
+        QtBind.setChecked(gui,checkCave,True)
+    else:
+       use_cave = False
     if data['db path']:
         db_path = data['db path']
         QtBind.setText(gui,path_database,data['db path'])
@@ -767,8 +832,155 @@ def load_last_plugin_settings():
         QtBind.setText(gui,offsetChangeAreaValue,data['offset area'])
     else:
        QtBind.setText(gui,offsetChangeAreaValue,DEFAULT_AREA_OFFSET)
+    if data['role']:
+        QtBind.setText(gui,roleValue,data['role'])
 
-    
+def add_party_skills():  
+    party_buff_data = {}
+    dic = get_skills()
+    party_buff_skills = get_skills_to_add(dic,char.first_id,char.party_buff_list) 
+    config_file = get_profile_path()  
+    with open(char.bot_config_path + config_file,"r") as file:
+        config_data = json.load(file)
+        party_buff_data['Str'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Str",[])
+        party_buff_data['Int'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Int",[])
+        party_buff_data['Physical Buff'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Physical Buff",[])
+        party_buff_data['Magical Buff'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Magical Buff",[])
+        party_buff_data['Healing Cycle'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Healing Cycle",[])
+        party_buff_data['Pain Quota'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Pain Quota",[])
+        party_buff_data['Physical Fence'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Physical Fence",[])
+        party_buff_data['Magical Fence'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Magical Fence",[])
+        party_buff_data['Protect'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Protect",[])
+        party_buff_data['Physical Screen'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Physical Screen",[])
+        party_buff_data['Morale Screen'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Morale Screen",[])
+        party_buff_data['Ultimate Screen'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Ultimate Screen",[])
+        party_buff_data['Mana Switch'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Mana Switch",[])
+        party_buff_data['Mana Cycle'] = config_data.get("Skills", {}).get("Party Buffs", []).get("Mana Cycle",[])
+    for skill_server_name in party_buff_skills:
+        for name,job in dic_party_roles.items():
+            if char.role == "Warrior":
+                if len(party_buff_data[party_buff_skills[skill_server_name]]) >= 2:
+                    continue
+                elif party_buff_skills[skill_server_name] == 'Pain Quota':
+                    if name in party_buff_data['Physical Fence'] or name in party_buff_data['Magical Fence']:
+                        continue
+                elif party_buff_skills[skill_server_name] == 'Protect':
+                    if name in party_buff_data['Physical Fence'] or name in party_buff_data['Magical Fence']:
+                        continue                                            
+                elif party_buff_skills[skill_server_name] == 'Physical Fence':
+                    if name in party_buff_data['Pain Quota'] or name in party_buff_data['Protect']:
+                        continue  
+                elif party_buff_skills[skill_server_name] == 'Magical Fence':
+                    if name in party_buff_data['Pain Quota'] or name in party_buff_data['Protect']:
+                        continue
+            if char.role == "Healer":
+                if party_buff_skills[skill_server_name] == 'Healing Cycle':
+                    for key in dic:
+                        if dic[key]['name'] == "Healing Orbit":
+                            config_data['Skills']['Party Buffs']['Healing Cycle'] = []
+                            break
+            if char.role == "Bard":
+                if party_buff_skills[skill_server_name] == 'Mana Cycle':
+                    for key in dic:
+                        if dic[key]['name'] == "Mana Orbit":
+                            config_data['Skills']['Party Buffs']['Mana Cycle'] = []
+                            break
+            if job == 'Attacker':
+                if char.role == "Bard" and not char.is_main_bard:
+                    continue
+                if not name in party_buff_data[party_buff_skills[skill_server_name]]:
+                    config_data['Skills']['Party Buffs'][party_buff_skills[skill_server_name]].append(name)
+            else:
+                if char.role == "Bard" and char.is_main_bard:
+                    continue
+                if party_buff_skills[skill_server_name] in LIST_EXCL_BUFFS:
+                    continue
+                if not name in party_buff_data[party_buff_skills[skill_server_name]]:
+                    config_data['Skills']['Party Buffs'][party_buff_skills[skill_server_name]].append(name)
+    with open(char.bot_config_path + config_file,"w") as file:
+        file.write(json.dumps(config_data,indent=4))
+        log(f"{PLUGIN}: Party Buffs successfully changed in [{config_file}]")
+        config_loader()
+
+def add_skills():
+    dic = get_skills()
+    attack_skills = get_skills_to_add(dic,char.first_id,char.attack_list)
+    buff_skills = get_skills_to_add(dic,char.first_id,char.buff_list)
+    healing_skills = get_skills_to_add(dic,char.first_id,char.healing_buff_list)
+    config_file = get_profile_path()
+    with open(char.bot_config_path + config_file,"r") as file:
+        config_data = json.load(file)
+        config_data['Skills']['sNormal'] = []
+        config_data['Skills']['bNormal'] = []
+        config_data['Skills']['Healing'] = []
+        for x in attack_skills:
+            config_data['Skills']['sNormal'].append(attack_skills[x])
+        for x in buff_skills:
+            config_data['Skills']['bNormal'].append(buff_skills[x])
+        for x in healing_skills:
+            config_data['Skills']['Healing'].append(healing_skills[x])
+    with open(char.bot_config_path + config_file,"w") as file:
+        file.write(json.dumps(config_data,indent=4))
+        log(f"{PLUGIN}: Attacks successfully changed in [{config_file}]")
+        config_loader()
+    if not char.role == "Attacker":
+        Timer(2.0,get_roles_from_chat,[]).start()
+
+def get_dic_cur_skills(dic,skill_list):
+    dic_servername = {}
+    for x in dic:
+        if dic[x]['name'] in skill_list:
+            dic_servername[dic[x]['servername']] = dic[x]['name']
+    return dic_servername
+
+def trim_string(string):
+    numb_split = 4
+    if '_EU_' in string:
+        numb_split = 5
+    pool = string.split('_')
+    return '_'.join(pool[:numb_split])
+
+def get_skills_to_add(dic,id,skill_list):
+    dic_servername = {}
+    for item in dic:
+        skill_server_name = dic[item]['servername']
+        skill_name = dic[item]['name']
+        skill_trim_name = trim_string(skill_server_name)
+        if skill_name in skill_list:
+            if not any(skill_trim_name in key for key in dic_servername)or skill_name in LIST_SKILL_EXCEPTIONS:
+                for key in DIC_SKILL_NAME_CHANGER:
+                        if skill_name == key:
+                            skill_name = DIC_SKILL_NAME_CHANGER[key]
+                            break
+                dic_servername[skill_server_name] = skill_name
+            else:
+                lvl = dic[item]['level']
+                for newItem in dic:
+                    new_skill_server_name = dic[newItem]['servername']
+                    new_skill_trim_name = trim_string(new_skill_server_name)
+                    if new_skill_trim_name == skill_trim_name:
+                        new_lvl = dic[newItem]['level']
+                        if lvl > new_lvl:
+                            for name in dic_servername:
+                                if new_skill_trim_name in name:
+                                    dic_servername.pop(name)
+                                    break
+                            for key in DIC_SKILL_NAME_CHANGER:
+                                    if skill_name == key:
+                                        skill_name = DIC_SKILL_NAME_CHANGER[key]
+                                        break
+                            dic_servername[skill_server_name] = skill_name
+    return dic_servername
+
+def change_gap(gap):
+    config_file = get_profile_path()
+    with open(char.bot_config_path + config_file,"r") as file:
+        config_data = json.load(file)   
+        config_data["Auto Mastery"]["Gap"] = gap
+    with open(char.bot_config_path + config_file,"w") as file:
+        file.write(json.dumps(config_data,indent=4))
+        log(f"{PLUGIN}: Gap successfully changed to [{str(gap)}]")
+        config_loader() 
 
 class Character(): 
 
@@ -779,7 +991,7 @@ class Character():
         self.bot_config_path = get_config_dir()
         self.folder_path = self.bot_config_path + f"\{PLUGIN}\\"  
         self.char_config_path = self.folder_path + f"{self.server}_{self.name}.json"
-        self.is_main_bard = is_main_bard
+        self.is_main_bard = self.get_main_bard()
         self.__load_data()
 
     def get_data(self):
@@ -788,17 +1000,33 @@ class Character():
     def get_data_from_json(self):
         self.__load_data_from_json()
 
+    def get_role(self):
+        if os.path.exists(self.char_config_path):
+            with open(self.char_config_path,"r") as file:
+                config_data = json.load(file)
+                try:
+                    role = config_data.get('Role',"")
+                    return role
+                except:
+                    pass
+        role = QtBind.text(gui, roleValue)
+    
+    def get_main_bard(self):
+        if os.path.exists(self.char_config_path):
+            with open(self.char_config_path,"r") as file:
+                config_data = json.load(file)
+                try:
+                    main_bard = config_data.get('Main Bard',False)
+                except:
+                    pass
+        if main_bard:
+            return True
+        return False
+
     def __load_data(self):
-        self.first_mastery,self.second_mastery,self.first_id,self.second_id = get_masterys()
-        if self.first_mastery:
-            self.first_mastery_name = self.first_mastery['name']
-        else:
-            self.first_mastery_name = ""
-        if self.second_mastery:
-            self.second_mastery_name = self.second_mastery['name']
-        else:
-            self.second_mastery_name = ""
-        self.role = self.__get_role()
+        self.masterys = get_masterys()
+        self.role = self.get_role()
+        self.__get_skill_list()
 
     def __load_data_from_json(self):
         if os.path.exists(config_path + f"\{PLUGIN}\\" + f"{char_data['server']}_{char_data['name']}.json"):
@@ -824,55 +1052,82 @@ class Character():
     def get_mastery_id(self):
         return self.first_id,self.second_id 
     
-    def __get_role(self):
+    def __get_skill_list(self):
         inventory = get_inventory()
-        weapon = inventory['items'][6]['servername']
+        weapon = inventory['items'][6]['servername']        
         self.weapon = weapon
         self.buff_list = ""
         self.attack_list = ""
         self.party_buff_list = ""
-        if self.first_mastery_name == "Cleric":
-            self.attack_list = LIST_CLERIC_ATTACKS
-            self.buff_list = LIST_CLERIC_BUFFS
-            self.party_buff_list = LIST_CLERIC_PARTY_BUFFS
-            return "Healer"
-        elif self.first_mastery_name == "Bard":
-            self.attack_list = LIST_BARD_ATTACKS
-            if is_main_bard:
-                self.buff_list = LIST_BARD_BUFFS_MAIN
-            else:
-                self.buff_list = LIST_BARD_BUFFS_SECOND
-            self.party_buff_list = LIST_BARD_PARTY_BUFFS
-            return "Bard"
-        elif self.first_mastery_name == "Warrior":
-            if "TSWORD" in weapon:
-                self.attack_list = LIST_2H_ATTACKS
-                self.buff_list = LIST_2H_BUFFS            
-            elif "SWORD" in weapon:
-                self.attack_list = LIST_1H_ATTACKS
-                self.buff_list = LIST_1H_BUFFS
-            elif "AXE" in weapon:
-                self.attack_list = LIST_AXE_ATTACKS
-                self.buff_list = LIST_AXE_BUFFS                 
-            self.party_buff_list = LIST_WARRIOR_PARTY_BUFFS
-            return "Tank"
-        elif self.first_mastery_name == "Wizard":
-            self.attack_list = LIST_WIZ_ATTACKS
-            self.buff_list = LIST_WIZ_BUFFS
-            return "Attacker"
-        elif self.first_mastery_name == "Rouge":
-            if "XBOW" in weapon:
-                self.attack_list = LIST_XBOW_ATTACKS
-                self.buff_list = LIST_XBOW_BUFFS
-            elif "DAGGER" in weapon:
-                self.attack_list = LIST_DAGGER_ATTACKS
-                self.buff_list = LIST_DAGGER_BUFFS
-            return "Attacker"
-        elif self.first_mastery_name == "Warlock":
-            self.attack_list = LIST_WARLOCK_ATTACKS
-            self.buff_list = LIST_WARLOCK_BUFFS
-            return "Attacker"
-        return ""
+        self.healing_buff_list = ""
+        self.first_mastery_name = self.masterys[0]['Name']
+        self.first_id = self.masterys[0]['ID']
+        for i in range(0,len(self.masterys)):
+            if self.masterys[i]['Name'] == "Cleric" and self.role == "Healer":
+                self.attack_list = LIST_CLERIC_ATTACKS
+                self.buff_list = LIST_CLERIC_BUFFS
+                self.party_buff_list = LIST_CLERIC_PARTY_BUFFS
+                self.healing_buff_list = LIST_CLERIC_HEALING_BUFFS
+                return
+            elif self.masterys[i]['Name'] == "Bard" and self.role == "Bard":
+                self.attack_list = LIST_BARD_ATTACKS
+                if self.is_main_bard:
+                    self.buff_list = LIST_BARD_BUFFS_MAIN
+                else:
+                    self.buff_list = LIST_BARD_BUFFS_SECOND
+                self.party_buff_list = LIST_BARD_PARTY_BUFFS
+                return
+            elif self.masterys[i]['Name'] == "Warrior" and self.role == "Warrior":
+                if "TSWORD" in weapon:
+                    self.attack_list = LIST_2H_ATTACKS
+                    self.buff_list = LIST_2H_BUFFS            
+                elif "SWORD" in weapon:
+                    self.attack_list = LIST_1H_ATTACKS
+                    self.buff_list = LIST_1H_BUFFS
+                elif "AXE" in weapon:
+                    self.attack_list = LIST_AXE_ATTACKS
+                    self.buff_list = LIST_AXE_BUFFS                 
+                self.party_buff_list = LIST_WARRIOR_PARTY_BUFFS
+                return
+            elif self.masterys[i]['Name'] == "Wizard" and self.role == "Attacker":
+                self.attack_list = LIST_WIZ_ATTACKS
+                self.buff_list = LIST_WIZ_BUFFS
+                return
+            elif self.masterys[i]['Name'] == "Rogue" and self.role == "Attacker":
+                if "XBOW" in weapon:
+                    self.attack_list = LIST_XBOW_ATTACKS
+                    self.buff_list = LIST_XBOW_BUFFS
+                elif "DAGGER" in weapon:
+                    self.attack_list = LIST_DAGGER_ATTACKS
+                    self.buff_list = LIST_DAGGER_BUFFS
+                return 
+            elif self.masterys[i]['Name'] == "Warlock" and self.role == "Attacker":
+                self.attack_list = LIST_WARLOCK_ATTACKS
+                self.buff_list = LIST_WARLOCK_BUFFS
+                return
+            elif self.masterys[i]['Name'] == "Pacheon" and self.role == "Attacker":
+                self.attack_list = LIST_PACHEON_ATTACKS
+                self.buff_list = LIST_PACHEON_BUFFS
+                return 
+            elif self.masterys[i]['Name'] == "Bicheon":
+                if self.role == "Attacker":
+                    self.attack_list = LIST_BICHEON_ATTACKS
+                    self.buff_list = LIST_BICHEON_BUFFS
+                    return
+                elif self.role == "Nuker":
+                    self.attack_list = LIST_BICHEON_NUKER_ATTACKS
+                    self.buff_list = LIST_BICHEON_BUFFS
+                    return 
+            elif self.masterys[i]['Name'] == "Heuksal":
+                if self.role == "Attacker":
+                    self.attack_list = LIST_PACHEON_ATTACKS
+                    self.buff_list = LIST_PACHEON_BUFFS
+                    return 
+                elif self.role == "Nuker":
+                    self.attack_list = LIST_HEUKSAL_NUKER_ATTACKS
+                    self.buff_list = LIST_HEUKSAL_BUFFS
+                    return
+             
 
 # Misc #
 def set_bools_to_false():
@@ -947,7 +1202,7 @@ def get_current_auto_area():
     for area in LIST_TRAINING_AREA:
         if  current_x-5 <= float(area['x']) <= current_x+5 and current_y-5 <= float(area['y']) <= current_y+5:
             return area
-
+    
 def upate_visual():
     c_data = get_character_data()
     level = c_data['level']
@@ -956,7 +1211,11 @@ def upate_visual():
     QtBind.setText(gui,gui_level_value,str(level))
     QtBind.setText(gui,gui_exp_value,str(round(exp*100,2))+'%')
     QtBind.setText(gui,gui_sp_value,str(sp))
-    
+
+def reset_skills():
+    global blocker_skills
+    blocker_skills = False
+
 ### Auto-Training ###
 # Automaticly changes the training Area #
 def change_area():
@@ -974,7 +1233,7 @@ def change_area():
         lvl = check_party_level()
         if solo_mode:
             c_data = get_character_data()
-            lvl = c_data['level']
+            lvl = c_data['level']        
         lvl += int(QtBind.text(gui,offsetChangeAreaValue))
         current_area = get_training_area()
         current_x = float(current_area['x'])
@@ -993,7 +1252,7 @@ def change_area():
                     set_training_script('')
                     Timer(0.5,set_training_position,[area['region'], area['x'], area['y'],area['z']]).start()
                     Timer(1.0,start_bot,()).start()
-                    Timer(0.1+int(QtBind.text(gui,delayChangeAreaValue)*60),reset_blocker_change_area,()).start()
+                    Timer(0.1+float(QtBind.text(gui,delayChangeAreaValue)*60),reset_blocker_change_area,()).start()
                     log(f"{PLUGIN}: Changing Training Area to Monsters with level: {area['level']}")
                     Timer(1.0,update_area_visual,[lvl]).start()
                     break
@@ -1038,7 +1297,7 @@ def get_map_coordinates(region_id,pos_x,pos_y):
         Y = (((region_id >> 8) & 0xFF) - 128) * 192 + pos_y / 10
     return X,Y
 
-def readDB(table,col,item):        
+def readDB(table,col,item):
     db_path = QtBind.text(gui,path_database)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -1049,13 +1308,55 @@ def readDB(table,col,item):
     for row in rows:
         if row[col] == item:
             return row
- 
+
+def get_char_db():
+    path = get_config_path()
+    path = path[:-4]+'db3'
+    return path
+
+def change_char_db(table,id,column1='',column2='',t1=0,amount=0):
+    dbPath =  get_char_db()
+    conn = sqlite3.connect(dbPath)
+    cursor = conn.cursor()
+    if table == 'town':
+        query = f"UPDATE {table} SET {column1} = '{t1}', {column2} = {amount} WHERE id = {id}"
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+
+def read_char_db(table,id='',servername='',itemname=''):
+	dbPath = get_char_db()
+	conn = sqlite3.connect(dbPath)
+	cursor = conn.cursor()
+	query = f"SELECT * FROM {table}"
+	cursor.execute(query)
+	rows = cursor.fetchall()
+	conn.close()
+	if id:
+		for row in rows:
+			if row[0] == id:
+				return row    
+	elif servername:
+		for row in rows:
+			if row[1] == servername:
+				return row
+	elif itemname:
+		for row in rows:
+			if row[2] == itemname:
+				return row
+
 def get_npc_position_from_db(quest):
     if "Beginner's Assistant" in quest:
         quest = "Lv. 5 Beginner's Assistant"
     npc_start = readDB('quest',2,quest)[3].split(',')
     if len(npc_start) > 1:
         reg = readDB('zones',0,get_position()['region'])[1].upper()
+        if reg == "CHINA":
+            reg = "_CH_"
+        elif reg == "WEST_CHINA":
+            reg = "_WC_"
+        elif reg == "OASIS_KINGDOM":
+            reg = "_KT_"
         for item in npc_start:
             if reg in item:
                 npc_start = item
@@ -1137,9 +1438,12 @@ def check_available_quest():
         if "Beginner's Assistant" in current_quests[item]['name']:
             return str(current_quests[item]['name'])
     if cur_inv_size == 45 and level >= 5:
+        #Inventory Expansion 1 (China)
         return 'Inventory Expansion 1 (Europe)'
     if cur_inv_size == 55 and level >= 32:
         return 'Inventory Expansion 2 (Europe)'
+    if cur_inv_size == 59 and level >= 64:
+        return 'Inventory Expansion 3 (Common)'
     return
 
 class Quest():
@@ -1195,15 +1499,11 @@ class Quest():
     def walk_to_monster(self):
         if not self.is_walking_to_monster:
             self.script_to_monster = generate_script_to_destination(DIC_QUEST_AREA[self.name]['region'],DIC_QUEST_AREA[self.name]['x'],DIC_QUEST_AREA[self.name]['y'])
-            len_script = self.script_to_monster.split('\n')
-            if len(len_script) > MAX_LEN_SCRIPT:
-                stop_bot()
-                use_return_scroll()
-                self.is_teleporting_for_quest = True
-                return
             if "Dismounting pet" in self.script_to_monster:
-                self.script_to_monster = self.script_to_monster.replace('Dismounting pet','')
-            self.script_last_x,self.script_last_y = (self.script_to_monster.strip().split("\n"))[-1].split(",")[1:3]
+                self.script_withoutpet_to_monster = self.script_to_monster.replace('Dismounting pet','')
+                self.script_last_x,self.script_last_y = (self.script_withoutpet_to_monster.strip().split("\n"))[-1].split(",")[1:3]
+            else:
+                self.script_last_x,self.script_last_y = (self.script_to_monster.strip().split("\n"))[-1].split(",")[1:3]
             if self.script_to_monster:
                 self.is_walking_to_monster = True
                 start_script(self.script_to_monster)
@@ -1353,7 +1653,7 @@ class Quest():
                     QtBind.setText(gui,gui_task_value,f'Walking to NPC {self.npc_ingame_name}')
                 else:
                     log(f'{PLUGIN}: Walking to Monster')
-                    QtBind.setText(gui,gui_task_value,'Walking to NPC Monster')
+                    QtBind.setText(gui,gui_task_value,'Walking to Monster')
                     self.walk_to_monster()
         else:
             self.walk_to_npc()
@@ -1663,9 +1963,13 @@ def change_blocker_buy(state):
     blocker_buy = state
 #PhBot Events
 def handle_joymax(opcode, data):
-    global quest
+    global quest,blocker_skills
     if opcode == 0xB0A1:
-        Timer(2.0,update_skills,()).start()
+        if not blocker_skills:
+            Timer(5.0,add_skills,()).start()
+            blocker_skills = True
+            Timer(7.0,reset_skills,()).start()
+            #Timer(2.0,update_skills,()).start()
     if opcode == 0x3056:
         change_area()
     if opcode == 0x30D4 and not quest == None:
@@ -1694,14 +1998,12 @@ def teleported():
     if not char == None and enabled:
         save_settings()
         
-def handle_event(t, data):
-    if t == 10:
-        change_area()
+
 
 counter = 0
 quest_counter = 0
 def event_loop():
-    global quest,counter,quest_counter,buy_items,blocker_buy,custom_timer
+    global quest,counter,quest_counter,buy_items,blocker_buy
     if not quest == None:
         if quest.is_walking_to_npc:
             stats = update_states()
@@ -1769,6 +2071,111 @@ def handle_chat(t,player,msg):
             msg = msg[len(PLUGIN)+2:]
             if msg == "Get Role" and not reading_chat:
                 phBotChat.Party(PLUGIN + ": Role = " +char.role)
+        elif msg == "RELOAD":
+            load_clicked()
+        elif msg.startswith('OFFAREA'):
+            msg = msg[8:]
+            QtBind.setText(gui,offsetChangeAreaValue,msg)
+        elif msg.startswith('DISABLE'):
+            checkEnable_clicked(False)
+            QtBind.setChecked(gui,checkEnable,False)
+        elif msg.startswith('ENABLE'):
+            checkEnable_clicked(True)
+            QtBind.setChecked(gui,checkEnable,True)
+        elif msg == "STOP":
+            stop_bot()
+        elif msg == "START":
+            start_bot()        
+        elif msg == "TRACEME":
+            start_trace(player)
+        elif msg.startswith("TRACE"):
+            msg = msg.rstrip()
+            if msg == "TRACE":
+                if start_trace(player):
+                    log("Plugin: Starting trace to ["+player+"]")
+            else:
+                msg = msg[5:].split()[0]
+                if start_trace(msg):
+                    log("Plugin: Starting trace to ["+msg+"]")
+        elif msg == "NOTRACE":
+            stop_trace()
+        elif msg == "ATKHERE":
+            stop_trace()
+            set_training_script('')
+            p = get_position()
+            set_training_position(p['region'], p['x'], p['y'],p['z'])
+            Timer(1.0,start_bot,()).start()
+        elif msg.startswith("SETPOS"):
+            msg = msg.rstrip()
+            if msg == "SETPOS":
+                set_training_script('')
+                p = get_position()
+                set_training_position(p['region'], p['x'], p['y'],p['z'])
+                log("Plugin: Training area set to current position (X:%.1f,Y:%.1f)"%(p['x'],p['y']))
+            else:
+                try:
+                    set_training_script('')
+                    p = msg[6:].split(',')
+                    x = float(p[0])
+                    y = float(p[1])
+                    region = int(p[2]) if len(p) >= 3 else 0
+                    z = float(p[3]) if len(p) >= 4 else 0
+                    set_training_position(region,x,y,z)
+                    log("Plugin: Training area set to (X:%.1f,Y:%.1f)"%(x,y))
+                except:
+                    log("Plugin: Wrong training area coordinates!")
+        elif msg.startswith('SETAREA '):
+            msg = msg[8:]
+            if msg:
+                set_training_script('')
+                if set_training_area(msg):
+                    log('Plugin: Training area has been changed to ['+msg+']')
+                else:
+                    log('Plugin: Training area ['+msg+'] not found in the list')
+        elif msg.startswith("SETRADIUS"):
+            msg = msg.rstrip()
+            if msg == "SETRADIUS":
+                radius = 35
+                set_training_radius(radius)
+                log("Plugin: Training radius reseted to "+str(radius)+" m.")
+            else:
+                try:
+                    radius = int(float(msg[9:].split()[0]))
+                    radius = (radius if radius > 0 else radius*-1)
+                    set_training_radius(radius)
+                    log("Plugin: Training radius set to "+str(radius)+" m.")
+                except:
+                    log("Plugin: Wrong training radius value!")
+        elif msg == "RETURN":
+            character = get_character_data()
+            if character['hp'] == 0:
+                log('Plugin: Resurrecting at town...')
+                inject_joymax(0x3053,b'\x01',False)
+            else:
+                log('Plugin: Trying to use return scroll...')
+                Timer(random.uniform(0.5,2),use_return_scroll).start()
+        elif msg.startswith("GAP"):
+            msg = msg[4:]
+            change_gap(int(msg))
+        elif msg == "SAVE":
+            save_clicked()
+        elif msg.startswith('BUY '):
+            msg = msg[4:].split(',')
+            if msg:
+                row = read_char_db('town',itemname=msg[0])
+                if row:
+                    change_char_db('town',row[0],'enabled','quantity',1,msg[1])
+                    log(f'Plugin: Added {msg[0]} to Townloop. Quantity: {msg[1]}')
+        elif msg.startswith('NOBUY '):
+            msg = msg[6:]
+            if msg:
+                row = read_char_db('town',itemname=msg)
+                if row:
+                    change_char_db('town',row[0],'enabled','quantity',0,0)
+                    log(f'Plugin: Removed {msg} from Townloop.')
+        
+        
+
 
 def check_Update():
 	global NewestVersion
@@ -1787,4 +2194,5 @@ def check_Update():
 			pass
       
 check_Update()
+
 log(f'Plugin: {PLUGIN} v{str(PLUGIN_VERSION)} sucessfully loaded!')
