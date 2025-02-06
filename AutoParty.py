@@ -13,7 +13,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.2
+PLUGIN_VERSION = 0.3
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -1252,7 +1252,7 @@ def change_area():
                     set_training_script('')
                     Timer(0.5,set_training_position,[area['region'], area['x'], area['y'],area['z']]).start()
                     Timer(1.0,start_bot,()).start()
-                    Timer(0.1+float(QtBind.text(gui,delayChangeAreaValue)*60),reset_blocker_change_area,()).start()
+                    Timer(0.1+float(QtBind.text(gui,delayChangeAreaValue))*60,reset_blocker_change_area,()).start()
                     log(f"{PLUGIN}: Changing Training Area to Monsters with level: {area['level']}")
                     Timer(1.0,update_area_visual,[lvl]).start()
                     break
