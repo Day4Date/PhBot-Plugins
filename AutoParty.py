@@ -1012,13 +1012,15 @@ class Character():
         role = QtBind.text(gui, roleValue)
     
     def get_main_bard(self):
+        main_bard = False
         if os.path.exists(self.char_config_path):
             with open(self.char_config_path,"r") as file:
                 config_data = json.load(file)
                 try:
                     main_bard = config_data.get('Main Bard',False)
                 except:
-                    pass
+                    main_bard = False
+                    log(f'{PLUGIN}: Failed to load config file for [{self.name}]')
         if main_bard:
             return True
         return False
