@@ -13,7 +13,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.3
+PLUGIN_VERSION = 0.4
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -159,13 +159,15 @@ LIST_TRAINING_AREA =[{'level':4,'x': -11482.5, 'y': 2688.199951171875, 'z': 19.0
                      {'level':71,'x': -5522.10009765625, 'y': 632.0999755859375, 'z': 4003.0, 'region': 24426, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':74,'x': -5199.60009765625, 'y': -59.80000305175781, 'z': 2076.0, 'region': 23403, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':82,'x': -4157.89990234375, 'y': -497.8999938964844, 'z': 3305.0, 'region': 22897, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
-                     {'level':87,'x': -4977.7998046875, 'y': -138.60000610351562, 'z': 3114.0, 'region': 23405, 'path': '', 'radius': 15.0, 'pick_radius': 50.0}]
+                     {'level':87,'x': -4977.7998046875, 'y': -138.60000610351562, 'z': 3114.0, 'region': 23405, 'path': '', 'radius': 15.0, 'pick_radius': 50.0},
+                     {'level':92,'x': -22211.80078125, 'y': -581.9000244140625, 'z': -47.0, 'region': -32762, 'path': '', 'radius': 20.0, 'pick_radius': 50.0}]
 
 ### Dic Quests Area  ###
 DIC_QUEST_AREA = {'Inventory Expansion 1 (Europe)':{'x': -11303.400390625, 'y': 2670.199951171875, 'z': 42.0, 'region': 26956, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                   'Inventory Expansion 2 (Europe)':{'x': -6059.5, 'y': 2505.699951171875, 'z': 180.0, 'region': 26983, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                   'Inventory Expansion 3 (Common)':{'x': -2042.300048828125, 'y': 82.19999694824219, 'z': 1550.0, 'region': 23676, 'path': '', 'radius': 50.0, 'pick_radius': 50.0},
-                  'Inventory Expansion 1 (China)':{'x': 6455.5, 'y': 825.9000244140625, 'z': -29.0, 'region': 24744, 'path': '', 'radius': 50.0, 'pick_radius': 50.0}}
+                  'Inventory Expansion 1 (China)':{'x': 6455.5, 'y': 825.9000244140625, 'z': -29.0, 'region': 24744, 'path': '', 'radius': 50.0, 'pick_radius': 50.0},
+                  'Inventory Expansion 2 (China)':{'x': 3608.0, 'y': 1450.0, 'z': 3, 'region': 25497, 'path': '', 'radius': 50.0, 'pick_radius': 50.0}}
 
 ### NPCS ###
 LIST_NPC_PROTECTOR = ['Protector Trader Jatomo','Protector Trader Aryoan','Protector Trader Gonishya','Protector Trader Yeolah','Protector Trader Mrs Jang']
@@ -295,11 +297,13 @@ def do_quest_clicked():
         do_auto_quest()
 
 def button6_clicked():
-        global char
-        char = Character()
-        add_skills()
+        # global char
+        # char = Character()
+        # add_skills()
         # p = get_training_area()
         # log(str(p))
+        c = get_character_data()['model']
+        log(str(get_monster(c)))
 
 ### Checkbox ###
 def checkEnable_clicked(checked):
@@ -662,6 +666,7 @@ def create_config_file():
                     "Solo Mode" : False,
                     "Auto Quest" : False,
                     "Party Size": "8",
+                    "Buy Items":False,
                     "Use Caves": False,
                     "Delay Area": "5",
                     "Offset Area": "0",
@@ -1246,7 +1251,7 @@ def change_area():
                 if area['level'] > lvl:
                     if  current_x-5 <= float(area['x']) <= current_x+5 and current_y-5 <= float(area['y']) <= current_y+5 :
                         break
-                    if area['region'] < 0:
+                    if area['region'] < 0 and lvl < 71:
                         if not use_cave:
                             continue  
                     blocker_change_area = True       
@@ -1374,6 +1379,8 @@ def get_npc_position_from_db(quest):
 
 def generate_script_to_destination(region,x,y):
     list_script = generate_script(region, x, y, 0)
+    if list_script == None:
+        log(f'{PLUGIN}: Error at "generate_script_to_destination". Path could not be found')
     if list_script:
         walk_scr = ""
         for item in list_script:
@@ -1382,42 +1389,6 @@ def generate_script_to_destination(region,x,y):
     else:
         log(f'{PLUGIN}: Error at "get_script_to_npc". Could not generate script') 
 
-def walk_to_quest(quest):
-    global bool_walk_to_quest
-    npc_pos = get_npc_position_from_db(quest)
-    if npc_pos:
-        x,y = get_map_coordinates(npc_pos[0],npc_pos[1],npc_pos[2])
-        if x:
-            script = generate_script_to_destination(npc_pos[0],x,y)
-            if script:
-                start_script(script)
-                set_bools_to_false()
-                bool_walk_to_quest = True
-            else:
-                log(f'{PLUGIN}: Error at "walk_to_quest". Could not generate script')
-                return
-        else:
-            log(f'{PLUGIN}: Error at "walk_to_quest". Could not get map_coordinates')
-            return
-    else:
-        log(f'{PLUGIN}: Error at "walk_to_quest". Could not get npc_pos')
-        return
-
-def walk_to_monster(quest):
-    global bool_walk_to_monster
-    area = DIC_QUEST_AREA[quest]
-    if area:
-        try:
-            script = generate_script_to_destination(area['region'],area['x'],area['y'])
-            start_script(script)
-            set_bools_to_false()
-            bool_walk_to_monster = True
-            return
-        except:
-            log(f'{PLUGIN}: Error at "walk_to_monster". Could not generate script')
-    else:
-        log(f'{PLUGIN}: Error at "walk_to_monster". Could not find an Area for {quest}')
-        return
 
 # Execute Quest #   
 def do_auto_quest():
@@ -1433,17 +1404,27 @@ def get_current_inventory_size():
 
 def check_available_quest():
     c_data = get_character_data()
+    model = c_data['model']
     level = c_data['level']
+    race = 'EU'
+    char_servername = get_monster(model)['servername']
+    if "_CH_" in char_servername:
+        race = 'CHN'
     cur_inv_size = get_current_inventory_size()
     current_quests = get_quests()
     for item in current_quests:
         if "Beginner's Assistant" in current_quests[item]['name']:
             return str(current_quests[item]['name'])
     if cur_inv_size == 45 and level >= 5:
-        #Inventory Expansion 1 (China)
-        return 'Inventory Expansion 1 (Europe)'
+        if race == 'EU':
+            return 'Inventory Expansion 1 (Europe)'
+        elif race == 'CHN':
+            return 'Inventory Expansion 1 (China)'
     if cur_inv_size == 55 and level >= 32:
-        return 'Inventory Expansion 2 (Europe)'
+        if race == 'EU':
+           return 'Inventory Expansion 2 (Europe)'
+        elif race == 'CHN':
+            return 'Inventory Expansion 2 (China)'
     if cur_inv_size == 59 and level >= 64:
         return 'Inventory Expansion 3 (Common)'
     return
@@ -1507,6 +1488,8 @@ class Quest():
             else:
                 self.script_last_x,self.script_last_y = (self.script_to_monster.strip().split("\n"))[-1].split(",")[1:3]
             if self.script_to_monster:
+                log(f'{PLUGIN}: Walking to Monster')
+                QtBind.setText(gui,gui_task_value,'Walking to Monster')
                 self.is_walking_to_monster = True
                 start_script(self.script_to_monster)
         elif self.is_walking_to_monster:
@@ -1653,9 +1636,8 @@ class Quest():
                 if self.is_beginner_quest:                
                     self.walk_to_npc()
                     QtBind.setText(gui,gui_task_value,f'Walking to NPC {self.npc_ingame_name}')
-                else:
-                    log(f'{PLUGIN}: Walking to Monster')
-                    QtBind.setText(gui,gui_task_value,'Walking to Monster')
+                else:     
+                    log(f'{PLUGIN}: Generating Script to Monster')               
                     self.walk_to_monster()
         else:
             self.walk_to_npc()
