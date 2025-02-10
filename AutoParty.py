@@ -5,15 +5,13 @@ import sqlite3
 import struct
 import json 
 import os
-import time
-import shutil
 from threading import Timer
 import urllib.request
 import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.4
+PLUGIN_VERSION = 0.5
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -43,11 +41,11 @@ LIST_WIZ_ATTACKS = ["Fire Bolt","Meteor","Fire Blow","Salamander Blow","Ice Bolt
                     "Lightning Bolt","Chain Lightning","Charged Wind","Charged Squall","Ground Charge","Ground Rave ","Earth Shock","Earth Quake",]
 LIST_WIZ_BUFFS = ["Life Control","Life Turnover","Earth Barrier","Earth Fence","Bless Spell","Holy Word","Holy Spell","Moving March","Swing March","Noise"]
 #XBow
-LIST_XBOW_ATTACKS = []
-LIST_XBOW_BUFFS = []
+LIST_XBOW_ATTACKS = ["Power Shot","Intense Shot","Fast Shot","Rapid Shot","Long Shot","Distance Shot","Blast Shot","Hurricane Shot"]
+LIST_XBOW_BUFFS = ["Bless Spell","Holy Word","Holy Spell","Moving March","Swing March","Noise"]
 #Dagger
-LIST_DAGGER_ATTACKS = []
-LIST_DAGGER_BUFFS = []
+LIST_DAGGER_ATTACKS = ["Spinning","Wounds","Mortal Wounds","Scud","Screw","Combo Blow","Butterfly Blow","Prick"]
+LIST_DAGGER_BUFFS = ["Bless Spell","Holy Word","Holy Spell","Moving March","Swing March","Noise"]
 #Warlock
 LIST_WARLOCK_ATTACKS = ["Blood Flower","Death Flower","Bloody Trap","Death Trap","Blaze","Dark Blaze","Toxin ","Toxin Invasion","Decayed","Dark Decayed",
                         "Curse Breath","Dark Breath","Medical Raze","Magical Ravage","Combat Raze","Combat Ravage","Courage Raze","Courage Ravage",
@@ -297,13 +295,12 @@ def do_quest_clicked():
         do_auto_quest()
 
 def button6_clicked():
-        # global char
-        # char = Character()
-        # add_skills()
+        global char
+        char = Character()
+        add_skills()
         # p = get_training_area()
         # log(str(p))
-        c = get_character_data()['model']
-        log(str(get_monster(c)))
+
 
 ### Checkbox ###
 def checkEnable_clicked(checked):
@@ -389,7 +386,8 @@ def checkTraining_clicked(checked):
 
 ### Functions ###
 def load_game_data():
-    global char
+    global char,game_data_loaded
+    game_data_loaded = True
     char = Character()
 
 def config_loader():
@@ -511,7 +509,7 @@ def check_settings():
     change_bot_config_settings(arg1 = l1,arg2 = l2)
 
 def get_masterys():
-    dic_mastery = get_mastery()    
+    dic_mastery = get_mastery()   
     dic_mastery = sorted(dic_mastery.items(), key=lambda item: item[1]['level'],reverse=True)
     list_masterys = []
     for i in range(0,len(dic_mastery)):
@@ -522,135 +520,14 @@ def get_masterys():
             list_masterys.append({'Name':name,'ID':id,'Level':level})
     return list_masterys
 
-def update_skills():
-    global role
-    if enabled:
-        is_buffer = False    
-        if role == "":
-            data = load_settings_from_json()
-            if not data.get('role', "") == "":
-                role = data['role']
-            else:
-                save_settings()
-        if role == 'Tank' or role == 'Bard' or role == 'Healer':
-            is_buffer = True     
-        skills = get_skills()
-        config_file = get_profile_path()
-        mastery_id_1 = char.first_id
-        skill_is_empty = True
-        buff_is_empty = True
-        party_buff_is_empty = True
-        new_skill_added = False   
-        new_buff_added = False   
-        new_party_buff_added = False   
-        with open(char.bot_config_path + config_file,"r") as file:
-            config_data = json.load(file)
-            curSkills = config_data['Skills']['sNormal']
-            curBuffs = config_data['Skills']['bNormal']
-            curPartyBuffs = config_data['Skills']['Party Buffs']
-            try:
-                data_skills = config_data['Skills']['sNormal']
-                data_buffs = config_data['Skills']['bNormal']
-            except:
-                log(f"{PLUGIN}: Can´t read Data. Attack-Skills couldn´t be changed!")
-            if type(data_skills) == list:
-                skill_is_empty = False
-            if type(data_buffs) == list:
-                buff_is_empty = False
-            for item in skills:
-                if skills[item]['mastery'] == mastery_id_1:
-                    if skills[item]['name'] in char.attack_list and not skills[item]['name'] in curSkills:
-                        if not skill_is_empty:                        
-                            config_data['Skills']['sNormal'].append(skills[item]['name'])
-                            new_skill_added = True
-                        else:
-                            config_data['Skills']['sNormal'] = skills[item]['name']
-                            skill_is_empty = False
-                            new_skill_added = True
-                    elif skills[item]['name'] in char.buff_list and not skills[item]['name'] in curBuffs:
-                        if not buff_is_empty:                        
-                            config_data['Skills']['bNormal'].append(skills[item]['name'])                            
-                            new_buff_added = True
-                            if skills[item]['name'] in LIST_CLERIC_HEALING_BUFFS:
-                                config_data['Skills']['bScript'].append(skills[item]['name'])
-                        else:
-                            config_data['Skills']['bNormal'] = skills[item]['name']
-                            buff_is_empty = False
-                            new_buff_added = True
-                            if skills[item]['name'] in LIST_CLERIC_HEALING_BUFFS:
-                                config_data['Skills']['bScript'] = skills[item]['name'] 
-                    elif skills[item]['name'] in LIST_CLERIC_HEALING_BUFFS and role == 'Healer':
-                        if not buff_is_empty:                        
-                            config_data['Skills']['Healing'].append(skills[item]['name'])
-                            new_buff_added = True
-                        else:
-                            config_data['Skills']['Healing'] = skills[item]['name']
-                            buff_is_empty = False
-                            new_buff_added = True           
-                    elif skills[item]['name'] in char.party_buff_list and is_buffer:
-                        buff_name = skills[item]['name']
-                        if buff_name in LIST_INT_BUFFS:
-                            buff_name = "Int"
-                        elif buff_name in LIST_STR_BUFFS:   
-                            buff_name = "Str"
-                        elif buff_name in LIST_PHY_BUFFS:   
-                            buff_name = "Physical Buff"          
-                        elif buff_name in LIST_MAG_BUFFS:   
-                            buff_name = "Magical Buff"          
-                        get_roles_from_chat()
-                        time.sleep(1.0)                    
-                        for name,job in dic_party_roles.items():
-                            if (role == "Tank" or role == "Healer" or role == "Bard") and not name in config_data['Skills']['Party Buffs'][buff_name]:
-                                if job == "Attacker":
-                                    if role == 'Bard' and not char.is_main_bard:
-                                        continue
-                                    if role == "Tank":
-                                        if len(config_data['Skills']['Party Buffs'][buff_name]) >= 2:
-                                            continue
-                                        elif buff_name == 'Pain Quota':
-                                            if name in config_data['Skills']['Party Buffs']['Physical Fence'] or name in config_data['Skills']['Party Buffs']['Magical Fence']:
-                                                continue
-                                        elif buff_name == 'Protect':
-                                            if name in config_data['Skills']['Party Buffs']['Physical Fence'] or name in config_data['Skills']['Party Buffs']['Magical Fence']:
-                                                continue                                            
-                                        elif buff_name == 'Physical Fence':
-                                            if name in config_data['Skills']['Party Buffs']['Pain Quota'] or name in config_data['Skills']['Party Buffs']['Protect']:
-                                                continue  
-                                        elif buff_name == 'Magical Fence':
-                                            if name in config_data['Skills']['Party Buffs']['Pain Quota'] or name in config_data['Skills']['Party Buffs']['Protect']:
-                                                continue  
-                                    config_data['Skills']['Party Buffs'][buff_name].append(name)
-                                    new_party_buff_added = True
-                                elif not skills[item]['name'] in LIST_LIMITED_PARTY_BUFFS:   
-                                    if role == 'Bard' and char.is_main_bard:    
-                                        continue                             
-                                    config_data['Skills']['Party Buffs'][buff_name].append(name)
-                                    new_party_buff_added = True
-                                
-                                    
-                                    
-            if new_skill_added or new_buff_added or new_party_buff_added:
-                with open(char.bot_config_path + config_file,"w") as file:
-                    file.write(json.dumps(config_data,indent=4))
-                    log(f"{PLUGIN}: Attacks successfully changed in [{config_file}]") if new_skill_added else log(f"{PLUGIN}: Buffs successfully changed in [{config_file}]")
-                    config_loader()
-                    return 
-            return
 
 def create_config_file():
-    default_config_path = char.folder_path + "default.json"
     if game_data_loaded:
         if not os.path.exists(char.char_config_path):
             if not os.path.exists(char.folder_path):
                 os.makedirs(char.folder_path)
-            if os.path.exists(default_config_path):
-                try:
-                    shutil.copyfile(default_config_path,char.char_config_path)
-                    log(f"{PLUGIN}: Created a new config file for [{char.name}]!")
-                except:
-                    log(f"{PLUGIN}: There was an error while creating a config file for [{char.name}].")
-            else:
-                log(f"{PLUGIN}: No default.json found. Creating a new default file!")
+            try:
+                log(f"{PLUGIN}: Creating a new config file!")
                 data={
                     "Name": "",
                     "Mastery": [],
@@ -676,8 +553,8 @@ def create_config_file():
                 with open(char.char_config_path,'w',encoding='utf-8') as file:
                     json.dump(data,file,indent=4,ensure_ascii=False)
                 Timer(2.0,save_settings,()).start()
-        else:
-            log(f"{PLUGIN}: Config file for [{char.name}] already exists.")
+            except:
+                log(f"{PLUGIN}: Can´t create new config file!")
 
 def change_plugin_configs(*args):
     char.get_data()
@@ -878,6 +755,15 @@ def add_party_skills():
                 elif party_buff_skills[skill_server_name] == 'Magical Fence':
                     if name in party_buff_data['Pain Quota'] or name in party_buff_data['Protect']:
                         continue
+                elif party_buff_skills[skill_server_name] == 'Physical Screen':
+                    if len(party_buff_skills[skill_server_name]) >= 1:
+                        continue
+                elif party_buff_skills[skill_server_name] == 'Morale Screen':
+                    if len(party_buff_skills[skill_server_name]) >= 1:
+                        continue
+                elif party_buff_skills[skill_server_name] == 'Ultimate Screen':
+                    if len(party_buff_skills[skill_server_name]) >= 1:
+                        continue
             if char.role == "Healer":
                 if party_buff_skills[skill_server_name] == 'Healing Cycle':
                     for key in dic:
@@ -900,6 +786,8 @@ def add_party_skills():
                     continue
                 if party_buff_skills[skill_server_name] in LIST_EXCL_BUFFS:
                     continue
+                if party_buff_skills[skill_server_name] == 'Healing Cycle' and role == "Bard":
+                    continue
                 if not name in party_buff_data[party_buff_skills[skill_server_name]]:
                     config_data['Skills']['Party Buffs'][party_buff_skills[skill_server_name]].append(name)
     with open(char.bot_config_path + config_file,"w") as file:
@@ -909,9 +797,9 @@ def add_party_skills():
 
 def add_skills():
     dic = get_skills()
-    attack_skills = get_skills_to_add(dic,char.first_id,char.attack_list)
-    buff_skills = get_skills_to_add(dic,char.first_id,char.buff_list)
-    healing_skills = get_skills_to_add(dic,char.first_id,char.healing_buff_list)
+    attack_skills = get_skills_to_add(dic,"Attack",char.attack_list)
+    buff_skills = get_skills_to_add(dic,"Buffs",char.buff_list)
+    healing_skills = get_skills_to_add(dic,"Buffs",char.healing_buff_list)
     config_file = get_profile_path()
     with open(char.bot_config_path + config_file,"r") as file:
         config_data = json.load(file)
@@ -933,6 +821,12 @@ def add_skills():
 
 def get_dic_cur_skills(dic,skill_list):
     dic_servername = {}
+    if dic == None:
+        log(f"{PLUGIN}: Can´t create a list of skills. Dictionary is empty!")
+        return None
+    if skill_list == None:
+        log(f"{PLUGIN}: Can´t create a list of skills. Skill list is empty!")
+        return None
     for x in dic:
         if dic[x]['name'] in skill_list:
             dic_servername[dic[x]['servername']] = dic[x]['name']
@@ -945,8 +839,14 @@ def trim_string(string):
     pool = string.split('_')
     return '_'.join(pool[:numb_split])
 
-def get_skills_to_add(dic,id,skill_list):
+def get_skills_to_add(dic,skill_type,skill_list):
     dic_servername = {}
+    if dic == None:
+        log(f"{PLUGIN}: Can´t create a list of skills to add. Dictionary is empty!")
+        return None
+    if skill_list == None:
+        log(f"{PLUGIN}: Can´t create a list of skills to add. Skill list is empty!")
+        return None
     for item in dic:
         skill_server_name = dic[item]['servername']
         skill_name = dic[item]['name']
@@ -970,10 +870,11 @@ def get_skills_to_add(dic,id,skill_list):
                                 if new_skill_trim_name in name:
                                     dic_servername.pop(name)
                                     break
-                            for key in DIC_SKILL_NAME_CHANGER:
-                                    if skill_name == key:
-                                        skill_name = DIC_SKILL_NAME_CHANGER[key]
-                                        break
+                            if not skill_type == "Buffs":
+                                for key in DIC_SKILL_NAME_CHANGER:
+                                        if skill_name == key:
+                                            skill_name = DIC_SKILL_NAME_CHANGER[key]
+                                            break
                             dic_servername[skill_server_name] = skill_name
     return dic_servername
 
@@ -989,7 +890,7 @@ def change_gap(gap):
 
 class Character(): 
 
-    def __init__(self):
+    def __init__(self):        
         self.data = get_character_data()
         self.name = self.data['name']
         self.server = self.data['server']
@@ -1067,8 +968,14 @@ class Character():
         self.attack_list = ""
         self.party_buff_list = ""
         self.healing_buff_list = ""
-        self.first_mastery_name = self.masterys[0]['Name']
-        self.first_id = self.masterys[0]['ID']
+        if len(self.masterys) < 1:
+            self.attack_list = ""
+            self.buff_list = ""
+            self.party_buff_list = ""
+            self.healing_buff_list = ""
+        else:
+            self.first_mastery_name = self.masterys[0]['Name']
+            self.first_id = self.masterys[0]['ID']
         for i in range(0,len(self.masterys)):
             if self.masterys[i]['Name'] == "Cleric" and self.role == "Healer":
                 self.attack_list = LIST_CLERIC_ATTACKS
@@ -1099,9 +1006,9 @@ class Character():
             elif self.masterys[i]['Name'] == "Wizard" and self.role == "Attacker":
                 self.attack_list = LIST_WIZ_ATTACKS
                 self.buff_list = LIST_WIZ_BUFFS
-                return
+                return 
             elif self.masterys[i]['Name'] == "Rogue" and self.role == "Attacker":
-                if "XBOW" in weapon:
+                if "CROSSBOW" in weapon:
                     self.attack_list = LIST_XBOW_ATTACKS
                     self.buff_list = LIST_XBOW_BUFFS
                 elif "DAGGER" in weapon:
@@ -1235,7 +1142,7 @@ def change_area():
             if quest.is_doing_quest:
                 return
         party = get_party()
-        if not len(party) >= int(QtBind.text(gui,partySize)):
+        if not len(party) >= int(QtBind.text(gui,partySize)) and not solo_mode:
             return
         lvl = check_party_level()
         if solo_mode:
@@ -1712,7 +1619,7 @@ class Buy_items():
                 'earring':earring,'necklace':necklace,'ring_1':ring_1,'ring_2':ring_2}
         for x in char_set:
             if char_set[x] == None:
-                char_set[x] = {'model': 11623, 'servername': 'ITEM_EU_M_CLOTHES_01_BA_A_DEF', 'name': 'Sagittarius Cotton Robe (Basic)', 'quantity': 1, 'plus': 0, 'durability': 31}
+                char_set[x] = inv['items'][1]
         return char_set
 
     def get_npc_protector_tab(self):
@@ -1863,7 +1770,7 @@ class Buy_items():
         log(f'{PLUGIN}: Items available! Buying Items')
         self.is_buying_items = True
         if self.is_at_npc:
-            log('1')
+            log(f'{PLUGIN}: Buying items')
         else:
             self.walk_to_npc()
         
@@ -1950,10 +1857,9 @@ def handle_joymax(opcode, data):
     global quest,blocker_skills
     if opcode == 0xB0A1:
         if not blocker_skills:
-            Timer(5.0,add_skills,()).start()
+            Timer(12.0,add_skills,()).start()
             blocker_skills = True
-            Timer(7.0,reset_skills,()).start()
-            #Timer(2.0,update_skills,()).start()
+            Timer(15.0,reset_skills,()).start()
     if opcode == 0x3056:
         change_area()
     if opcode == 0x30D4 and not quest == None:
@@ -1967,8 +1873,8 @@ def teleported():
     if not game_data_loaded:
         log(f'{PLUGIN}: Loading data')
         load_game_data()
-        Timer(2.0,load_last_plugin_settings,()).start()
         Timer(5.0,create_config_file,()).start()
+        Timer(7.0,load_last_plugin_settings,()).start()
         game_data_loaded = True
         return
     if not quest == None:
@@ -1983,12 +1889,18 @@ def teleported():
         save_settings()
         
 
-
 counter = 0
 quest_counter = 0
+save_counter = 0
 def event_loop():
-    global quest,counter,quest_counter,buy_items,blocker_buy
-    if not quest == None:
+    global quest,counter,quest_counter,buy_items,blocker_buy,save_counter
+    if enabled and save_counter >= 240:
+        if not char == None:
+            save_settings()
+        save_counter = 0
+    elif enabled:
+        save_counter += 1
+    if not quest == None and not blocker_buy:
         if quest.is_walking_to_npc:
             stats = update_states()
             quest.cur_char_position = stats[1],stats[2]
@@ -2012,7 +1924,7 @@ def event_loop():
                 counter = 0
             else:
                 counter += 1
-    if enabled and auto_quest and quest == None:
+    if enabled and auto_quest and quest == None and not blocker_buy:
         if quest_counter >= 60:
             q = check_available_quest()
             if q:
@@ -2031,7 +1943,7 @@ def event_loop():
                 quest_counter = 0
         else:
             quest_counter += 1
-    if not buy_items == None:
+    if not buy_items == None and quest == None:
         if buy_items.is_walking_to_npc:
             stats = update_states()
             buy_items.cur_char_position = stats[1],stats[2]
@@ -2044,6 +1956,7 @@ def event_loop():
                 buy_items.buy()
             else:
                 buy_items = None
+
     
 def handle_chat(t,player,msg):
     global dic_party_roles
@@ -2157,6 +2070,14 @@ def handle_chat(t,player,msg):
                 if row:
                     change_char_db('town',row[0],'enabled','quantity',0,0)
                     log(f'Plugin: Removed {msg} from Townloop.')
+        elif msg.startswith("TP"):
+            msg = msg[3:]
+            if not msg:
+                return
+            split = ',' if ',' in msg else ' '
+            source_dest = msg.split(split)
+            if len(source_dest) >= 2:
+                inject_teleport(source_dest[0].strip(),source_dest[1].strip())
         
         
 
