@@ -11,7 +11,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.5
+PLUGIN_VERSION = 1.0
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -131,7 +131,20 @@ LIST_SKILL_EXCEPTIONS = ["Meteor"]
 DIC_SKILL_NAME_CHANGER = {'Body Blessing':'Physical Buff','Body Deity':'Physical Buff','Soul Blessing':'Magical Buff','Soul Deity':'Magical Buff',
                     'Force Blessing':'Str','Force Deity':'Str','Mental Blessing':'Int','Mental Deity':'Int'}
 ### Training Areas ###
-LIST_TRAINING_AREA =[{'level':4,'x': -11482.5, 'y': 2688.199951171875, 'z': 19.0, 'region': 27211, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+LIST_TRAINING_AREA =[{'level':4,'x': 6771.0, 'y': 1250.199951171875, 'z': 29.0, 'region': 25258, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':7,'x': 6642.7001953125, 'y': 1429.300048828125, 'z': 53.0, 'region': 25513, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':10,'x': 5780.5, 'y': 354.3999938964844, 'z': 301.0, 'region': 23973, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':13,'x': 5318.89990234375, 'y': 341.70001220703125, 'z': 1051.0, 'region': 23970, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':16,'x': 5003.2001953125, 'y': -10.899993896484375, 'z': 1387.0, 'region': 23457, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':19,'x': 4466.7998046875, 'y': 810.7999877929688, 'z': 179.0, 'region': 24734, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':23,'x': 4422.2998046875, 'y': 2106.199951171875, 'z': -123.0, 'region': 26270, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':25,'x': 4027.199951171875, 'y': 2307.60009765625, 'z': -40.0, 'region': 26779, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':27,'x': 3775.300048828125, 'y': 1971.4000244140625, 'z': -74.0, 'region': 26266, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':30,'x': 2887.5, 'y': 1647.199951171875, 'z': -71.0, 'region': 25750, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':32,'x': 2798.5, 'y': 994.2, 'z': 11.0, 'region': 24981, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':34,'x': 3251.5, 'y': 65.2, 'z': 225.0, 'region': 23703, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':38,'x': 2317.5, 'y': 328.2, 'z': 635.0, 'region': 23187, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':4,'x': -11482.5, 'y': 2688.199951171875, 'z': 19.0, 'region': 27211, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':7,'x': -12271.2001953125, 'y': 2567.10009765625, 'z': -20.0, 'region': 26951, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':10,'x': -12371.0, 'y': 3062.199951171875, 'z': -160.0, 'region': 27462, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':12,'x': -12667.900390625, 'y': 2882.5, 'z': 26.0, 'region': 27461, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
@@ -187,6 +200,7 @@ enabled = False
 is_main_bard = False
 solo_mode = False
 use_cave = False
+use_chn_spots = False
 auto_quest = False
 auto_area = False
 buy_npc_items = False
@@ -208,6 +222,7 @@ checkBard = QtBind.createCheckBox(gui,'checkBard_clicked','Main Bard',x,y+30)
 checkSolo = QtBind.createCheckBox(gui,'checkSolo_clicked','Solo Mode',x+110,y+30)
 checkCave = QtBind.createCheckBox(gui,'checkCave_clicked','Use Cave',x+220,y+30)
 checkTrainingArea = QtBind.createCheckBox(gui,'checkTraining_clicked', 'Auto Area',x,y+60)
+checkChnSpots = QtBind.createCheckBox(gui,'checkChn_clicked', 'Use CHN Spots',x+110,y+60)
 partySizeText = QtBind.createLabel(gui, 'Party Size', x, y+90)
 partySize = QtBind.createCombobox(gui, x+100, y+90, 100, 20)
 roleText = QtBind.createLabel(gui, 'Role', x+220, y+90)
@@ -295,11 +310,11 @@ def do_quest_clicked():
         do_auto_quest()
 
 def button6_clicked():
-        global char
-        char = Character()
-        add_skills()
-        # p = get_training_area()
-        # log(str(p))
+        # global char
+        # char = Character()
+        # add_skills()
+        p = get_training_area()
+        log(str(p))
 
 
 ### Checkbox ###
@@ -383,6 +398,17 @@ def checkTraining_clicked(checked):
         auto_area = False
         change_plugin_configs(False,'Auto Area')
         log(f'{PLUGIN}: Auto Area disabled')
+
+def checkChn_clicked(checked):
+    global use_chn_spots
+    if checked:
+        use_chn_spots = True
+        change_plugin_configs(True,'Use Chn Spots')
+        log(f'{PLUGIN}: Chn Spots enabled') 
+    else:
+        use_chn_spots = False
+        change_plugin_configs(False,'Use Chn Spots')
+        log(f'{PLUGIN}: Chn Spots disabled')
 
 ### Functions ###
 def load_game_data():
@@ -545,6 +571,7 @@ def create_config_file():
                     "Party Size": "8",
                     "Buy Items":False,
                     "Use Caves": False,
+                    "Use Chn Spots": False,
                     "Delay Area": "5",
                     "Offset Area": "0",
                     "Auto Area": False,
@@ -609,6 +636,7 @@ def save_settings():
                 config_data['Party Size'] = QtBind.text(gui, partySize)   
                 config_data['Buy Items'] = buy_npc_items
                 config_data['Use Caves'] = use_cave
+                config_data['Use Chn Spots'] = use_chn_spots
                 config_data['Delay Area'] = QtBind.text(gui, delayChangeAreaValue) 
                 config_data['Auto Area'] = auto_area
                 config_data['DB Path'] = QtBind.text(gui,path_database)   
@@ -644,6 +672,7 @@ def load_settings_from_json():
                     data['offset area'] = config_data.get('Offset Area', 0)
                     data['auto area'] = config_data.get('Auto Area', False)
                     data['use cave'] = config_data.get('Use Caves', False)
+                    data['use chn spots'] = config_data.get('Use Chn Spots', False)
                     data['db path'] = config_data.get('DB Path', '')
                 except:
                     log(f"{PLUGIN}: Can´t read Data. An Error occured while reading the config file!")
@@ -656,7 +685,7 @@ def get_roles_from_chat():
     Timer(2.0,add_party_skills,[]).start()
 
 def load_last_plugin_settings():
-    global enabled, is_main_bard, solo_mode, auto_quest,char,buy_npc_items,auto_area,db_path,use_cave
+    global enabled, is_main_bard, solo_mode, auto_quest,char,buy_npc_items,auto_area,db_path,use_cave,use_chn_spots
     data = load_settings_from_json()
     if data['plugin enabled']:
         enabled = True
@@ -705,6 +734,11 @@ def load_last_plugin_settings():
         QtBind.setChecked(gui,checkCave,True)
     else:
        use_cave = False
+    if data['use chn spots']:
+        use_chn_spots = True
+        QtBind.setChecked(gui,checkChnSpots,True)
+    else:
+       use_chn_spots = False
     if data['db path']:
         db_path = data['db path']
         QtBind.setText(gui,path_database,data['db path'])
@@ -816,7 +850,7 @@ def add_skills():
         file.write(json.dumps(config_data,indent=4))
         log(f"{PLUGIN}: Attacks successfully changed in [{config_file}]")
         config_loader()
-    if not char.role == "Attacker":
+    if not char.role == "Attacker" and not char.role == "Nuker":
         Timer(2.0,get_roles_from_chat,[]).start()
 
 def get_dic_cur_skills(dic,skill_list):
@@ -1160,6 +1194,9 @@ def change_area():
                         break
                     if area['region'] < 0 and lvl < 71:
                         if not use_cave:
+                            continue
+                    if area['x'] > 0 and lvl < 40:
+                        if not use_chn_spots:
                             continue  
                     blocker_change_area = True       
                     stop_bot()
@@ -1590,6 +1627,12 @@ class Buy_items():
         return False
 
     def get_max_item_level(self):
+        c_data = get_character_data()
+        model = c_data['model']
+        level = c_data['level']
+        char_servername = get_monster(model)['servername']
+        if "_CH_" in char_servername:
+            return c_data['level']
         all_masterys = get_mastery()
         mastery = ''
         max = 0
