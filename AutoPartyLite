@@ -11,7 +11,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 0.5
+PLUGIN_VERSION = 1.0
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -2011,6 +2011,7 @@ def handle_chat(t,player,msg):
             msg = msg[len(PLUGIN)+2:]
             if msg == "Get Role" and not reading_chat:
                 phBotChat.Party(PLUGIN + ": Role = " +char.role)
+    
         
         
 
