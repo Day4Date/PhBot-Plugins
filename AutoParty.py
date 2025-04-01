@@ -1947,7 +1947,7 @@ def teleported():
     if not quest == None:
         if quest.is_teleporting_for_quest:
             quest.is_teleporting_for_quest = False
-            quest.do_quest()
+            Timer(5.0,quest.do_quest,()).start()
             return
     if not char == None and enabled:
         save_settings()
