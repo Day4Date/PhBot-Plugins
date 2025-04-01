@@ -11,7 +11,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 1.0
+PLUGIN_VERSION = 1.1
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -53,12 +53,12 @@ LIST_WARLOCK_ATTACKS = ["Blood Flower","Death Flower","Bloody Trap","Death Trap"
 LIST_WARLOCK_BUFFS = ["Mirage","Phantasma","Reflect","Advanced Reflect","Bless Spell","Holy Word","Holy Spell"]
 #Bard
 LIST_BARD_ATTACKS = ["Horror Chord","Weird Chord","Booming Chord","Booming Wave",]
-LIST_BARD_BUFFS_MAIN = ["Moving March","Swing March","Guard Tambour","Noise","Mana Cycle","Mana Orbit"]
-LIST_BARD_BUFFS_SECOND = ["Moving March","Swing March","Mana Tambour","Noise","Mana Cycle","Dancing of Magic","Dancing of Wizardry"]
+LIST_BARD_BUFFS_MAIN = ["Moving March","Swing March","Guard Tambour","Noise","Mana Cycle","Mana Orbit","Cure Music"]
+LIST_BARD_BUFFS_SECOND = ["Moving March","Swing March","Mana Tambour","Noise","Mana Cycle","Dancing of Magic","Dancing of Wizardry","Cure Music"]
 LIST_BARD_PARTY_BUFFS = ["Mana Switch","Mana Cycle"]
 #Cleric
 LIST_CLERIC_ATTACKS = ["Trial Cross","Justice Cross","Over Healing","Glut Healing"]
-LIST_CLERIC_BUFFS = ["Reverse","Grad Reverse","Healing Cycle","Soul Deity",
+LIST_CLERIC_BUFFS = ["Reverse","Grad Reverse","Healing Cycle","Soul Deity","Integrity",
                      "Healing Orbit","Bless Spell","Recovery Division","Holy Recovery Division","Group Reverse",
                      "Holy Group Reverse","Reverse Oblation","Reverse Immolation","Holy Word","Holy Spell","Body Blessing","Body Deity","Soul Blessing"]
 LIST_CLERIC_PARTY_BUFFS = ["Force Blessing","Force Deity","Mental Blessing","Mental Deity","Body Blessing","Body Deity","Soul Blessing","Soul Deity",
@@ -148,7 +148,7 @@ LIST_TRAINING_AREA =[{'level':4,'x': 6771.0, 'y': 1250.199951171875, 'z': 29.0, 
                      {'level':7,'x': -12271.2001953125, 'y': 2567.10009765625, 'z': -20.0, 'region': 26951, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':10,'x': -12371.0, 'y': 3062.199951171875, 'z': -160.0, 'region': 27462, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':12,'x': -12667.900390625, 'y': 2882.5, 'z': 26.0, 'region': 27461, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
-                     {'level':15,'x': -11545.7001953125, 'y': 2168.300048828125, 'z': -31.0, 'region': 26442, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':15,'x': -11625.7001953125, 'y': 2206.300048828125, 'z': -31.0, 'region': 26442, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':19,'x': -11800.900390625, 'y': 1509.5999755859375, 'z': 0.0, 'region': 25417, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':23,'x': -8433.900390625, 'y': 1641.0999755859375, 'z': 0.0, 'region': 25691, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':26,'x': -7801.2001953125, 'y': 1998.5, 'z': 182.0, 'region': 26206, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
@@ -171,7 +171,8 @@ LIST_TRAINING_AREA =[{'level':4,'x': 6771.0, 'y': 1250.199951171875, 'z': 29.0, 
                      {'level':74,'x': -5199.60009765625, 'y': -59.80000305175781, 'z': 2076.0, 'region': 23403, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':82,'x': -4157.89990234375, 'y': -497.8999938964844, 'z': 3305.0, 'region': 22897, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':87,'x': -4977.7998046875, 'y': -138.60000610351562, 'z': 3114.0, 'region': 23405, 'path': '', 'radius': 15.0, 'pick_radius': 50.0},
-                     {'level':92,'x': -22211.80078125, 'y': -581.9000244140625, 'z': -47.0, 'region': -32762, 'path': '', 'radius': 20.0, 'pick_radius': 50.0}]
+                     {'level':95,'x': -22211.80078125, 'y': -581.9000244140625, 'z': -47.0, 'region': -32762, 'path': '', 'radius': 20.0, 'pick_radius': 50.0},
+                     {'level':98,'x': -16425.8, 'y': -648.9, 'z': 805.0, 'region': 22577, 'path': '', 'radius': 20.0, 'pick_radius': 50.0}]
 
 ### Dic Quests Area  ###
 DIC_QUEST_AREA = {'Inventory Expansion 1 (Europe)':{'x': -11303.400390625, 'y': 2670.199951171875, 'z': 42.0, 'region': 26956, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
@@ -182,6 +183,7 @@ DIC_QUEST_AREA = {'Inventory Expansion 1 (Europe)':{'x': -11303.400390625, 'y': 
 
 ### NPCS ###
 LIST_NPC_PROTECTOR = ['Protector Trader Jatomo','Protector Trader Aryoan','Protector Trader Gonishya','Protector Trader Yeolah','Protector Trader Mrs Jang']
+LIST_NPC_DRUG = {'EU':'Nun Retaldi','CA':'Nun Martel','OASIS_KINGDOM':'Potion Merchant Manina','WEST_CHINA':'Herbalist Bori','CHINA':'Herbalist Yangyun'}
 LIST_TOWNS = ['Constantinople','Samarkand','Hotan Kingdom','Western China Donwhang','Jangan']
 
 gui = QtBind.init(__name__,PLUGIN)
@@ -251,7 +253,7 @@ button2 = QtBind.createButton(gui,'stop_script_clicked','Stop Script',x+100,y)
 button3 = QtBind.createButton(gui,'buy_items_clicked','Buy Items',x+200,y)
 button4 = QtBind.createButton(gui,'load_clicked','Load Settings',x,y+30)
 button5 = QtBind.createButton(gui,'do_quest_clicked','Do Quest',x+100,y+30)
-button6 = QtBind.createButton(gui,'button6_clicked','Button 6',x+200,y+30)
+button6 = QtBind.createButton(gui,'add_skills_clicked','Add Skills',x+200,y+30)
 
 label_databse = QtBind.createLabel(gui,'Database path:',x-100,y+60)
 path_database = QtBind.createLineEdit(gui,'', x, y+60, 292, 20)
@@ -309,13 +311,10 @@ def do_quest_clicked():
     if q:
         do_auto_quest()
 
-def button6_clicked():
-        # global char
-        # char = Character()
-        # add_skills()
-        p = get_training_area()
-        log(str(p))
-
+def add_skills_clicked():
+    add_skills()
+    blocker_skills = True
+    Timer(2.0,reset_skills,()).start()
 
 ### Checkbox ###
 def checkEnable_clicked(checked):
@@ -545,7 +544,6 @@ def get_masterys():
             name = dic_mastery[i][1]['name']
             list_masterys.append({'Name':name,'ID':id,'Level':level})
     return list_masterys
-
 
 def create_config_file():
     if game_data_loaded:
@@ -1111,10 +1109,11 @@ def update_states():
     if quest:
         QtBind.setText(gui,gui_quest_value,quest.name)
         current_quests = get_quests()
-        for item in current_quests:
-            if current_quests[item]['name'] == quest.name:
-                QtBind.setText(gui,gui_quest_progress_value,str(current_quests[item]['objectives'][0]['notice']))
-                break
+        if current_quests:
+            for item in current_quests:
+                if current_quests[item]['name'] == quest.name:
+                    QtBind.setText(gui,gui_quest_progress_value,str(current_quests[item]['objectives'][0]['notice']))
+                    break
     return cur_region,cur_x,cur_y,cur_task
     
 def get_current_weapon():
@@ -1176,8 +1175,9 @@ def change_area():
             if quest.is_doing_quest:
                 return
         party = get_party()
-        if not len(party) >= int(QtBind.text(gui,partySize)) and not solo_mode:
-            return
+        if party:
+            if  not len(party) >= int(QtBind.text(gui,partySize)) and not solo_mode:
+                return
         lvl = check_party_level()
         if solo_mode:
             c_data = get_character_data()
@@ -1300,6 +1300,12 @@ def get_npc_position_from_db(quest):
     if "Beginner's Assistant" in quest:
         quest = "Lv. 5 Beginner's Assistant"
     npc_start = readDB('quest',2,quest)[3].split(',')
+    if len(npc_start) < 2 and "Beginner's Assistant" in quest:
+        if not is_in_town():
+            return
+        reg = readDB('zones',0,get_position()['region'])[1].upper()
+        npc_start = LIST_NPC_DRUG[reg]
+        npc_start = readDB('monsters',2,npc_start)[1]
     if len(npc_start) > 1:
         reg = readDB('zones',0,get_position()['region'])[1].upper()
         if reg == "CHINA":
@@ -1339,14 +1345,28 @@ def do_auto_quest():
     global quest
     q = check_available_quest()
     if q:
-        quest = Quest(q)
-        quest.do_quest()
+        free_size = get_free_inventory_slots()
+        if free_size > 0:
+            quest = Quest(q)
+            quest.do_quest()
+    return
 
 def get_current_inventory_size():
     c_inventory = get_inventory() 
     return c_inventory['size']
 
-def check_available_quest():
+def get_free_inventory_slots():
+    inv = get_inventory()
+    counter = 0
+    index = 0
+    for i in inv['items']:
+        index += 1
+        if index >13:
+            if i == None:
+                counter += 1
+    return counter
+
+def check_available_quest():    
     c_data = get_character_data()
     model = c_data['model']
     level = c_data['level']
@@ -1356,9 +1376,10 @@ def check_available_quest():
         race = 'CHN'
     cur_inv_size = get_current_inventory_size()
     current_quests = get_quests()
-    for item in current_quests:
-        if "Beginner's Assistant" in current_quests[item]['name']:
-            return str(current_quests[item]['name'])
+    if current_quests:
+        for item in current_quests:
+            if "Beginner's Assistant" in current_quests[item]['name']:
+                return str(current_quests[item]['name'])
     if cur_inv_size == 45 and level >= 5:
         if race == 'EU':
             return 'Inventory Expansion 1 (Europe)'
@@ -1417,29 +1438,27 @@ class Quest():
                 else:
                     log(f'{PLUGIN}: Walking to NPC for {self.name}')
         elif self.is_walking_to_npc:
-            if int(self.script_last_x)-1 <= int(self.cur_char_position[0]) <= int(self.script_last_x)+1:
-                if int(self.script_last_y)-1 <= int(self.cur_char_position[1]) <= int(self.script_last_y)+1:
+            if int(self.npc_game_x)-3 <= int(self.cur_char_position[0]) <= int(self.npc_game_x)+3:
+                if int(self.npc_game_y)-3 <= int(self.cur_char_position[1]) <= int(self.npc_game_y)+3:
                     log(f'{PLUGIN}: Script finished. Talking to NPC')
+                    stop_script()
                     self.is_walking_to_npc = False
                     self.enter_npc()
     
     def walk_to_monster(self):
         if not self.is_walking_to_monster:
             self.script_to_monster = generate_script_to_destination(DIC_QUEST_AREA[self.name]['region'],DIC_QUEST_AREA[self.name]['x'],DIC_QUEST_AREA[self.name]['y'])
-            if "Dismounting pet" in self.script_to_monster:
-                self.script_withoutpet_to_monster = self.script_to_monster.replace('Dismounting pet','')
-                self.script_last_x,self.script_last_y = (self.script_withoutpet_to_monster.strip().split("\n"))[-1].split(",")[1:3]
-            else:
-                self.script_last_x,self.script_last_y = (self.script_to_monster.strip().split("\n"))[-1].split(",")[1:3]
+            self.script_last_x,self.script_last_y = (self.script_to_monster.strip().split("\n"))[-1].split(",")[1:3]
             if self.script_to_monster:
                 log(f'{PLUGIN}: Walking to Monster')
                 QtBind.setText(gui,gui_task_value,'Walking to Monster')
                 self.is_walking_to_monster = True
                 start_script(self.script_to_monster)
         elif self.is_walking_to_monster:
-            if int(self.script_last_x)-3 <= int(self.cur_char_position[0]) <= int(self.script_last_x)+3:
-                if int(self.script_last_y)-3 <= int(self.cur_char_position[1]) <= int(self.script_last_y)+3:
+            if int(DIC_QUEST_AREA[self.name]['x'])-3 <= int(self.cur_char_position[0]) <= int(DIC_QUEST_AREA[self.name]['x'])+3:
+                if int(DIC_QUEST_AREA[self.name]['y'])-3 <= int(self.cur_char_position[1]) <= int(DIC_QUEST_AREA[self.name]['y'])+3:
                     log(f'{PLUGIN}: Script finished. Starting Quest')
+                    stop_script()
                     self.is_walking_to_monster = False
                     self.attack_monsters()
 
@@ -1459,9 +1478,13 @@ class Quest():
         self.is_talking_to_npc = True
         i = 0
         npc = get_npcs()
+        if not npc:
+            log(f'{PLUGIN}: Could not find NPC')
+            return
         for id in npc:
             if npc[id]['servername'] == self.npc_start_name:
                 break
+        log(f'{PLUGIN}: Entering NPC {self.npc_ingame_name}')
         QtBind.setText(gui,gui_task_value,f'Entering NPC {self.npc_ingame_name}')
         opcode =[0x7045,0x7046]
         data = [struct.pack('<I',id),struct.pack('<I',id) + struct.pack('1B',0x02)]
@@ -1552,18 +1575,19 @@ class Quest():
     
     def check_quest_taken(self):
         self.current_character_quests = get_quests()
-        for item in self.current_character_quests:
-            if self.current_character_quests[item]['name'] == self.name:
-                self.server_name = self.current_character_quests[item]['servername']
-                if self.current_character_quests[item]['completed']:
-                    self.quest_completed = True
-                    if self.is_attacking_monsters:
-                        self.is_attacking_monsters = False
-                        stop_bot()
-                        set_training_script('')
-                        Timer(0.5,set_training_position,[self.char_training_area['region'], self.char_training_area['x'], self.char_training_area['y'],self.char_training_area['z']]).start()        
-                        self.do_quest()                                                
-                return True
+        if self.current_character_quests:
+            for item in self.current_character_quests:
+                if self.current_character_quests[item]['name'] == self.name:
+                    self.server_name = self.current_character_quests[item]['servername']
+                    if self.current_character_quests[item]['completed']:
+                        self.quest_completed = True
+                        if self.is_attacking_monsters:
+                            self.is_attacking_monsters = False
+                            stop_bot()
+                            set_training_script('')
+                            Timer(0.5,set_training_position,[self.char_training_area['region'], self.char_training_area['x'], self.char_training_area['y'],self.char_training_area['z']]).start()        
+                            self.do_quest()                                                
+                    return True
         else:
             return False
 
@@ -1801,8 +1825,8 @@ class Buy_items():
                 start_script(self.script_to_npc)
                 log(f'{PLUGIN}: Walking to NPC {self.npc_name}')
         elif self.is_walking_to_npc:
-            if int(self.script_last_x)-1 <= int(self.cur_char_position[0]) <= int(self.script_last_x)+1:
-                if int(self.script_last_y)-1 <= int(self.cur_char_position[1]) <= int(self.script_last_y)+1:
+            if int(self.npc_game_x)-3 <= int(self.cur_char_position[0]) <= int(self.npc_game_x)+3:
+                if int(self.npc_game_y)-3 <= int(self.cur_char_position[1]) <= int(self.npc_game_y)+3:
                     log(f'{PLUGIN}: Script finished. Talking to NPC')
                     self.is_walking_to_npc = False
                     self.is_at_npc = True
@@ -1925,9 +1949,6 @@ def teleported():
             quest.is_teleporting_for_quest = False
             quest.do_quest()
             return
-    if enabled and auto_quest and quest == None:
-        Timer(4.0,do_auto_quest,()).start()
-        return
     if not char == None and enabled:
         save_settings()
         
@@ -1968,7 +1989,8 @@ def event_loop():
             else:
                 counter += 1
     if enabled and auto_quest and quest == None and not blocker_buy:
-        if quest_counter >= 60:
+        if quest_counter >= 20 and is_in_town():
+            quest_counter = 0
             q = check_available_quest()
             if q:
                 if "Inventory" in q:
@@ -1980,10 +2002,7 @@ def event_loop():
                 elif "Beginner's Assistant" in q:
                     quest_counter = 0
                     do_auto_quest() 
-                else:
-                    quest_counter = 0                               
-            else:
-                quest_counter = 0
+
         else:
             quest_counter += 1
     if not buy_items == None and quest == None:
@@ -1991,9 +2010,9 @@ def event_loop():
             stats = update_states()
             buy_items.cur_char_position = stats[1],stats[2]
             buy_items.walk_to_npc()
-    if enabled and buy_npc_items and quest == None and buy_items == None and not blocker_buy:
-        buy_items = Buy_items()
+    if enabled and buy_npc_items and quest == None and buy_items == None and not blocker_buy:        
         if is_in_town():
+            buy_items = Buy_items()
             if buy_items.check_if_items_available():
                 blocker_buy = True
                 buy_items.buy()
