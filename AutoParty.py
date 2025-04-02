@@ -11,7 +11,7 @@ import random
 
 
 PLUGIN = "AutoParty"
-PLUGIN_VERSION = 1.1
+PLUGIN_VERSION = 1.2
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -2013,11 +2013,13 @@ def event_loop():
     if enabled and buy_npc_items and quest == None and buy_items == None and not blocker_buy:        
         if is_in_town():
             buy_items = Buy_items()
-            if buy_items.check_if_items_available():
-                blocker_buy = True
-                buy_items.buy()
-            else:
-                buy_items = None
+            free_size = get_free_inventory_slots()
+            if free_size > 0:
+                if buy_items.check_if_items_available():
+                    blocker_buy = True
+                    buy_items.buy()
+                else:
+                    buy_items = None
 
     
 def handle_chat(t,player,msg):
