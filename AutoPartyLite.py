@@ -10,8 +10,8 @@ import urllib.request
 import random
 
 
-PLUGIN = "AutoParty"
-PLUGIN_VERSION = 1.2
+PLUGIN = "AutoPartyLite"
+PLUGIN_VERSION = 1.3
 MAX_LEN_SCRIPT = 90
 DEFAULT_PARTY_SIZE = "8"
 DEFAULT_AREA_DELAY = 5
@@ -38,7 +38,7 @@ LIST_AXE_ATTACKS = ["Taunting Target","Howling Shout","Sprint Assault""Down Cros
 LIST_AXE_BUFFS = ["Vital Increase","Iron Skin","Mana Skin"]
 #Wizzard
 LIST_WIZ_ATTACKS = ["Fire Bolt","Meteor","Fire Blow","Salamander Blow","Ice Bolt","Frozen Spear","Snow Wind","Blizzard",
-                    "Lightning Bolt","Chain Lightning","Charged Wind","Charged Squall","Ground Charge","Ground Rave ","Earth Shock","Earth Quake",]
+                    "Lightning Bolt","Chain Lightning","Charged Wind","Charged Squall","Earth Shock","Earth Quake",]
 LIST_WIZ_BUFFS = ["Life Control","Life Turnover","Earth Barrier","Earth Fence","Bless Spell","Holy Word","Holy Spell","Moving March","Swing March","Noise"]
 #XBow
 LIST_XBOW_ATTACKS = ["Power Shot","Intense Shot","Fast Shot","Rapid Shot","Long Shot","Distance Shot","Blast Shot","Hurricane Shot"]
@@ -148,7 +148,7 @@ LIST_TRAINING_AREA =[{'level':4,'x': 6771.0, 'y': 1250.199951171875, 'z': 29.0, 
                      {'level':7,'x': -12271.2001953125, 'y': 2567.10009765625, 'z': -20.0, 'region': 26951, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':10,'x': -12371.0, 'y': 3062.199951171875, 'z': -160.0, 'region': 27462, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':12,'x': -12667.900390625, 'y': 2882.5, 'z': 26.0, 'region': 27461, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
-                     {'level':15,'x': -11625.7001953125, 'y': 2206.300048828125, 'z': -31.0, 'region': 26442, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
+                     {'level':15,'x': -11314.7001953125, 'y': 2194.300048828125, 'z': -31.0, 'region': 26442, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':19,'x': -11800.900390625, 'y': 1509.5999755859375, 'z': 0.0, 'region': 25417, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':23,'x': -8433.900390625, 'y': 1641.0999755859375, 'z': 0.0, 'region': 25691, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
                      {'level':26,'x': -7801.2001953125, 'y': 1998.5, 'z': 182.0, 'region': 26206, 'path': '', 'radius': 30.0, 'pick_radius': 50.0},
@@ -242,7 +242,7 @@ for i in range(1,9):
     QtBind.append(gui,partySize,str(i))
 for i in range(0,11):
     QtBind.append(gui,delayChangeAreaValue,str(i))
-for i in range(-5,6):
+for i in range(-10,11):
     QtBind.append(gui,offsetChangeAreaValue,str(i))
 
 
@@ -1274,6 +1274,11 @@ def change_char_db(table,id,column1='',column2='',t1=0,amount=0):
         cursor.execute(query)
         conn.commit()
         conn.close()
+    elif table == 'quest':
+        query = f"UPDATE {table} SET {column1} = '{t1}', {column2} = {amount} WHERE id = {id}"
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
 
 def read_char_db(table,id='',servername='',itemname=''):
 	dbPath = get_char_db()
@@ -1346,7 +1351,7 @@ def do_auto_quest():
     q = check_available_quest()
     if q:
         free_size = get_free_inventory_slots()
-        if free_size > 0:
+        if free_size > 0:            
             quest = Quest(q)
             quest.do_quest()
     return
@@ -1362,7 +1367,7 @@ def get_free_inventory_slots():
     for i in inv['items']:
         index += 1
         if index >13:
-            if i == None:
+            if len(i)==0:
                 counter += 1
     return counter
 
@@ -1669,7 +1674,7 @@ class Buy_items():
         inv = get_inventory()
         list_inventory_items = []
         for x in inv['items']:
-            if not x == None:
+            if x:
                 list_inventory_items.append(x['servername'])
         self.list_inventory_items = list_inventory_items 
         head = inv['items'][0]
@@ -1919,16 +1924,59 @@ def reset_buyer():
 def change_blocker_buy(state):
     global blocker_buy
     blocker_buy = state
+
+def getPath2():
+	path = get_config_path()
+	path = path[:-4]+'db3'
+	return path
+
+def readDB2(table,id='',servername='',itemname=''):
+	dbPath = getPath2()
+	conn = sqlite3.connect(dbPath)
+	cursor = conn.cursor()
+	query = f"SELECT * FROM {table}"
+	cursor.execute(query)
+	rows = cursor.fetchall()
+	conn.close()
+	if id:
+		for row in rows:
+			if row[0] == id:
+				return row    
+	elif servername:
+		for row in rows:
+			if row[1] == servername:
+				return row
+	elif itemname:
+		for row in rows:
+			if row[2] == itemname:
+				return row
+            
+def inject_teleport(source,destination):
+	t = get_teleport_data(source, destination)
+	if t:
+		npcs = get_npcs()
+		for key, npc in npcs.items():
+			if npc['name'] == source or npc['servername'] == source:
+				log("Plugin: Selecting teleporter ["+source+"]")
+				# Teleport found, select it
+				inject_joymax(0x7045, struct.pack('<I', key), False)
+				# Start a timer to teleport in 2.0 seconds
+				Timer(2.0, inject_joymax, (0x705A,struct.pack('<IBI', key, 2, t[1]),False)).start()
+				Timer(2.0, log, ("Plugin: Teleporting to ["+destination+"]")).start()
+				return
+		log('Plugin: NPC not found. Wrong NPC name or servername')
+	else:
+		log('Plugin: Teleport data not found. Wrong teleport name or servername')
 #PhBot Events
 def handle_joymax(opcode, data):
     global quest,blocker_skills
     if opcode == 0xB0A1:
-        if not blocker_skills:
+        if not blocker_skills and enabled:
             Timer(12.0,add_skills,()).start()
             blocker_skills = True
             Timer(15.0,reset_skills,()).start()
-    if opcode == 0x3056:
-        change_area()
+    # if opcode == 0x3056:
+    #     change_area()
     if opcode == 0x30D4 and not quest == None:
         quest.quest_data = data
     if opcode == 0xB04B and not quest == None:
@@ -1956,14 +2004,21 @@ def teleported():
 counter = 0
 quest_counter = 0
 save_counter = 0
+area_counter = 0
 def event_loop():
-    global quest,counter,quest_counter,buy_items,blocker_buy,save_counter
+    global quest,counter,quest_counter,buy_items,blocker_buy,save_counter,area_counter
     if enabled and save_counter >= 240:
         if not char == None:
             save_settings()
         save_counter = 0
     elif enabled:
         save_counter += 1
+    if enabled and quest == None and buy_items == None and not blocker_buy and not blocker_change_area:
+        if area_counter >=40:
+            change_area()
+            area_counter = 0
+        else:
+            area_counter += 1
     if not quest == None and not blocker_buy:
         if quest.is_walking_to_npc:
             stats = update_states()
@@ -2020,23 +2075,8 @@ def event_loop():
                     buy_items.buy()
                 else:
                     buy_items = None
-
-    
-def handle_chat(t,player,msg):
-    global dic_party_roles
-    if t == 4:
-        if msg.startswith(PLUGIN + ": Role = ") and reading_chat:
-            msg = msg[len(PLUGIN) + 9:]
-            dic_party_roles[player] = msg
-        elif msg.startswith(PLUGIN):
-            msg = msg[len(PLUGIN)+2:]
-            if msg == "Get Role" and not reading_chat:
-                phBotChat.Party(PLUGIN + ": Role = " +char.role)
-    
+            buy_items = None     
         
-        
-
-
 def check_Update():
 	global NewestVersion
 	if NewestVersion == 0:
